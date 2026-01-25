@@ -1,0 +1,79 @@
+[gd_scene load_steps=2 format=3 uid="uid://dc6rmp6pgl6m8"]
+
+[ext_resource type="Script" path="res://scripts/settings_controller.gd" id="1_g28p2"]
+
+[node name="Settings" type="Control"]
+script = ExtResource("1_g28p2")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopBar" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 0
+offset_right = 227.0
+offset_bottom = 267.0
+
+[node name="SaveButton" type="Button" parent="TopBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+text = "保存并返回"
+
+[node name="InternalVBox" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+
+[node name="IntervalLabel" type="Label" parent="TopBar/InternalVBox"]
+layout_mode = 2
+text = "Interval(s): "
+
+[node name="IntervalEdit" type="TextEdit" parent="TopBar/InternalVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+text = "5"
+
+[node name="ProfitPercentVBox" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+
+[node name="ProfitPercentLabel" type="Label" parent="TopBar/ProfitPercentVBox"]
+layout_mode = 2
+text = "Profit Percent: "
+
+[node name="ProfitPercentEdit" type="TextEdit" parent="TopBar/ProfitPercentVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+text = "1"
+
+[node name="MinProfitVBox" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+
+[node name="MinProfitLabel" type="Label" parent="TopBar/MinProfitVBox"]
+layout_mode = 2
+text = "Minimum profit"
+
+[node name="MinProfitEdit" type="TextEdit" parent="TopBar/MinProfitVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+text = "10000"
+
+[node name="FilterIdVBox" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+
+[node name="FilterIdLabel" type="Label" parent="TopBar/FilterIdVBox"]
+layout_mode = 2
+size_flags_vertical = 0
+text = "ids"
+
+[node name="FilterIdEdit" type="TextEdit" parent="TopBar/FilterIdVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 200)
+layout_mode = 2
+text = "385,183,97,902,901,904,129,184,260,903,263,617,272,264,271,267,277,282,276,186,187,215,261,618,273,258,266,268,269,281,274,384,533,555,532,554,530,553,987,986,985,206,586,587,151,556,529,528,36,527,310,35,210,39,37,209,38,541,552,542,638,551,531,550,818,283,370,364,1080,1079,1082,1083,1078,1081,367,366,1485,1486,1494,358"
+wrap_mode = 1

@@ -1,0 +1,8 @@
+[package]
+name = "nodex"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+weav3r.workspace = true
+godot.workspace = true

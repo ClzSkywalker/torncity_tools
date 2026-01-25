@@ -1,0 +1,6 @@
+addons/*
+.godot/
+*.import
+*.uid
+*.tmp
+*.translation
