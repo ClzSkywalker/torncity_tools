@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://d3ngevu4ijcq6"]
+
+[node name="ProfitItem" type="ProfitItem"]
+custom_minimum_size = Vector2(430, 70)
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "Market:"
+
+[node name="HBox" type="HBoxContainer" parent="VBox"]
+custom_minimum_size = Vector2(430, 50)
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="ProfitSingleValue" type="Label" parent="VBox/HBox"]
+unique_name_in_owner = true
+clip_contents = true
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "SingleProfit:1200"
+
+[node name="ProfitTotalValue" type="Label" parent="VBox/HBox"]
+unique_name_in_owner = true
+clip_contents = true
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "TotalProfit: 120000"
+
+[node name="ProfitPercent" type="Label" parent="VBox/HBox"]
+unique_name_in_owner = true
+clip_contents = true
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Percent:4"

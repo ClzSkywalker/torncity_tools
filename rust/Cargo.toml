@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members =["bin", "crates/nodex", "crates/weav3r"]
+
+[workspace.dependencies]
+weav3r = { path = "crates/weav3r" }
+nodex = { path = "crates/nodex" }
+
+godot = "0.4.5"
+
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

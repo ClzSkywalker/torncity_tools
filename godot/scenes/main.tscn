@@ -1,0 +1,61 @@
+[gd_scene load_steps=3 format=3 uid="uid://lok4nkfbntua"]
+
+[ext_resource type="Script" uid="uid://qmh6xhg555kf" path="res://scripts/timer_controller.gd" id="1_0wfyh"]
+[ext_resource type="Texture2D" uid="uid://cwl5vuqa3ycpg" path="res://assets/icons/setting.png" id="1_o5qli"]
+
+[node name="Main" type="UiController"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Button" type="Button" parent="."]
+custom_minimum_size = Vector2(100, 50)
+layout_mode = 0
+offset_right = 100.0
+offset_bottom = 50.0
+size_flags_horizontal = 0
+text = "按钮"
+
+[node name="TimerController" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 83.0
+offset_right = 137.0
+offset_bottom = 114.0
+text = "Timer Controller"
+script = ExtResource("1_0wfyh")
+
+[node name="HTTPRequest" type="Weav3rHttpRequest" parent="."]
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 5.0
+autostart = true
+
+[node name="SettingsButton" type="Button" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 0
+offset_left = 109.0
+offset_top = 9.0
+offset_right = 167.0
+offset_bottom = 67.0
+size_flags_horizontal = 0
+icon = ExtResource("1_o5qli")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 0
+offset_left = 281.0
+offset_top = 37.0
+offset_right = 1181.0
+offset_bottom = 832.0
+horizontal_scroll_mode = 0
+
+[node name="GridContainer" type="GridContainer" parent="ScrollContainer"]
+custom_minimum_size = Vector2(1000, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/h_separation = 0
+theme_override_constants/v_separation = 4
+columns = 2
