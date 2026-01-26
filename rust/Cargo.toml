@@ -1,10 +1,11 @@
 [workspace]
 resolver = "2"
-members =["bin", "crates/nodex", "crates/weav3r"]
+members =["bin", "crates/nodex", "crates/tools", "crates/weav3r"]
 
 [workspace.dependencies]
 weav3r = { path = "crates/weav3r" }
 nodex = { path = "crates/nodex" }
+tools = { path = "crates/tools" }
 
 godot = "0.4.5"
 

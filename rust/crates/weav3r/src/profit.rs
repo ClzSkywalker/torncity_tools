@@ -115,7 +115,6 @@ pub fn filter(favorites_response: FavoritesResponse, filter: Filter) -> Vec<Prof
                 .filter_items
                 .iter()
                 .find(|x| x.id == item.id || x.name == item.name)
-                .take()
             {
                 if bazaar.price > filter_item.price {
                     continue;
@@ -152,7 +151,7 @@ pub fn filter(favorites_response: FavoritesResponse, filter: Filter) -> Vec<Prof
                     player_name: bazaar.player_name,
                     quantity: bazaar.quantity,
                     price: bazaar.price,
-                    total_value: total_value,
+                    total_value,
                     image: item.image.clone(),
                     market_profit_percentage,
                     market_profit_single_value: item.market_price - bazaar.price,
@@ -161,8 +160,8 @@ pub fn filter(favorites_response: FavoritesResponse, filter: Filter) -> Vec<Prof
                     avg_bazaar_profit_single_value: item.avg_bazaar_price - bazaar.price,
                     avg_bazaar_profit_total_value: avg_bazaar_total_value,
                     profit_percentage: profit_percent,
-                    profit_single_value: profit_single_value,
-                    profit_total_value: profit_total_value,
+                    profit_single_value,
+                    profit_total_value,
 
                     id: item.id,
                     name: item.name.clone(),
@@ -231,10 +230,9 @@ pub fn calc_profit(old: FavoritesRes, profit_items_new: Vec<ProfitInfo>) -> Favo
 
     user_profit_result.sort_by(|a, b| b.profit_total_value.cmp(&a.profit_total_value));
 
-    let result = FavoritesRes {
+    FavoritesRes {
         profit_items_new: profit_items_new.clone(),
         profit_items_old: old.profit_items_new.clone(),
         user_profit_result,
-    };
-    result
+    }
 }
