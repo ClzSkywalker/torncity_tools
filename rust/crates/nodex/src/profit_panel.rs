@@ -4,9 +4,9 @@ use godot::{
     prelude::*,
 };
 use std::hash::{Hash, Hasher};
+use tools::node::INodeFunc;
 use weav3r::profit::ProfitInfo;
 
-// const PROFIT_PANEL_SCENE: &str = "res://scenes/profit_panel.tscn";
 const LABEL_NAME: &str = "%Name";
 const LABEL_QUANTITY: &str = "%Quantity";
 const ICON_PATH: &str = "%Icon";
@@ -19,6 +19,12 @@ pub struct ProfitPanel {
     pub item: ProfitInfo,
     #[base]
     base: Base<PanelContainer>,
+}
+
+impl INodeFunc for ProfitPanel {
+    fn node_path() -> &'static str {
+        "res://scenes/profit_panel.tscn"
+    }
 }
 
 impl ProfitPanel {
@@ -80,9 +86,6 @@ impl ProfitPanel {
 
     fn load_texture_from_disk(url: &str) -> Option<Gd<ImageTexture>> {
         let path = Self::get_cache_path(url);
-        if FileAccess::open(path.as_str(), ModeFlags::READ).is_none() {
-            return None;
-        }
         let bytes = FileAccess::get_file_as_bytes(path.as_str());
         if bytes.is_empty() {
             return None;
@@ -219,10 +222,13 @@ pub struct ProfitItem {
     base: Base<Control>,
 }
 
-impl ProfitItem {
-    pub fn scene() -> &'static str {
+impl INodeFunc for ProfitItem {
+    fn node_path() -> &'static str {
         "res://scenes/profit_item.tscn"
     }
+}
+
+impl ProfitItem {
     fn label_name() -> &'static str {
         "%Label"
     }
@@ -250,7 +256,7 @@ impl ProfitItem {
 
     pub fn instance() -> Option<Gd<ProfitItem>> {
         let Some(profit_item_scene) = ResourceLoader::singleton()
-            .load(ProfitItem::scene())
+            .load(ProfitItem::node_path())
             .and_then(|res| res.try_cast::<PackedScene>().ok())
         else {
             godot_error!("ProfitItem: Failed to load profit_item_scene");

@@ -18,9 +18,6 @@ EXPORT_PATH ?= $(EXPORT_DIR_ABS)/$(EXPORT_NAME)$(EXPORT_EXT)
 build:
 	cargo build -p $(RUST_CRATE) --manifest-path $(RUST_MANIFEST)
 
-rust-release:
-	cargo build -p $(RUST_CRATE) --release --manifest-path $(RUST_MANIFEST)
-
 check-export-presets:
 	@test -f $(GODOT_PROJECT_DIR)/export_presets.cfg || ( \
 		echo "missing $(GODOT_PROJECT_DIR)/export_presets.cfg"; \
@@ -32,8 +29,16 @@ check-export-presets:
 export-presets:
 	$(GODOT_BIN) --path $(GODOT_PROJECT_DIR)
 
+rust-release:
+	cargo build -p $(RUST_CRATE) --release --manifest-path $(RUST_MANIFEST)
+
+# 导出 Godot 工程
 godot-export-release: check-export-presets
 	mkdir -p $(EXPORT_DIR_ABS)
 	$(GODOT_BIN) --headless --path $(GODOT_PROJECT_DIR) --export-release "$(EXPORT_PRESET)" "$(EXPORT_PATH)"
 
 package-release: rust-release godot-export-release
+
+# 后台运行 godot 的 LSP 服务
+godot-lsp:
+	$(GODOT_BIN) --headless --path $(GODOT_PROJECT_DIR) --lsp-port 6005

@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://qmh6xhg555kf" path="res://scripts/timer_controller.gd" id="1_0wfyh"]
 [ext_resource type="Texture2D" uid="uid://cwl5vuqa3ycpg" path="res://assets/icons/setting.png" id="1_o5qli"]
 
-[node name="Main" type="UiController"]
+[node name="Main" type="Weav3rMainScene"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
