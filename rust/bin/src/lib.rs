@@ -7,8 +7,12 @@ struct MyExtension;
 #[gdextension]
 unsafe impl ExtensionLibrary for MyExtension {
     fn on_stage_init(stage: InitStage) {
-        if stage == InitStage::Editor {
-            godot_print!("MainLoop");
+        match stage {
+            InitStage::Servers => {
+                godot_print!("stage: Servers");
+            },
+            InitStage::Editor => godot_print!("stage: Editor"),
+            _ => (),
         }
     }
 }

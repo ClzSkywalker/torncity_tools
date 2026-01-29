@@ -1,13 +1,16 @@
 [workspace]
 resolver = "2"
-members =["bin", "crates/nodex", "crates/tools", "crates/weav3r"]
+members =["bin", "crates/model", "crates/nodex", "crates/tools", "crates/torn_logic", "crates/weav3r"]
 
 [workspace.dependencies]
 weav3r = { path = "crates/weav3r" }
 nodex = { path = "crates/nodex" }
 tools = { path = "crates/tools" }
+torn_logic = { path = "crates/torn_logic" }
+model = { path = "crates/model" }
 
 godot = "0.4.5"
 
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+thiserror = "2"
