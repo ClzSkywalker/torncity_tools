@@ -24,32 +24,36 @@ impl CfgTool {
     pub fn read_config_f64(&self, section: &str, key: &str, default: f64) -> f64 {
         self.read_config(section, key, default)
     }
+    pub fn write_config_f64(&mut self, section: &str, key: &str, value: f64) {
+        self.write_config(section, key, value)
+    }
+
 
     pub fn read_config_i32(&self, section: &str, key: &str, default: i32) -> i32 {
         self.read_config(section, key, default)
+    }
+    pub fn write_config_i32(&mut self, section: &str, key: &str, value: i32) {
+        self.write_config(section, key, value)
     }
 
     pub fn read_config_i64(&self, section: &str, key: &str, default: i64) -> i64 {
         self.read_config(section, key, default)
     }
+    pub fn write_config_i64(&mut self, section: &str, key: &str, value: i64) {
+        self.write_config(section, key, value)
+    }
 
     pub fn read_config_u64(&self, section: &str, key: &str, default: u64) -> u64 {
         self.read_config(section, key, default)
+    }
+    pub fn write_config_u64(&mut self, section: &str, key: &str, value: u64) {
+        self.write_config(section, key, value)
     }
 
     pub fn read_config_string(&self, section: &str, key: &str, default: &str) -> String {
         let value: GString = self.read_config(section, key, GString::from(default));
         value.to_string()
     }
-
-    pub fn write_config_f64(&mut self, section: &str, key: &str, value: f64) {
-        self.write_config(section, key, value)
-    }
-
-    pub fn write_config_i32(&mut self, section: &str, key: &str, value: i32) {
-        self.write_config(section, key, value)
-    }
-
     pub fn write_config_string(&mut self, section: &str, key: &str, value: &str) {
         self.write_config(section, key, GString::from(value))
     }
