@@ -1,9 +1,12 @@
 use crate::{
-    node::http_weav3r::Weav3rHttpRequest, prelude::Weav3rItem,
+    node::prelude::*, prelude::Weav3rItem,
     scenes::weav3r_setting_scene::Weav3rSettingScene,
 };
 use godot::{
-    classes::{Button, Control, GridContainer, IControl, Node, PackedScene, ResourceLoader, Timer},
+    classes::{
+        AudioStreamPlayer, Button, Control, GridContainer, IControl, Node, PackedScene,
+        ResourceLoader, Timer,
+    },
     global::Error,
     prelude::*,
 };
@@ -24,6 +27,7 @@ pub struct Weav3rMainScene {
     http_request: Option<Gd<Weav3rHttpRequest>>,
     grid_container: Option<Gd<GridContainer>>,
     settings_button: Option<Gd<Button>>,
+    audio_player: Option<Gd<AudioStreamPlayer>>,
 }
 
 impl Weav3rMainScene {
@@ -224,7 +228,7 @@ impl Weav3rMainScene {
                     },
                     weav3r::profit::FilterItem {
                         name: "Feathery Hotel Coupon".to_string(),
-                        price: 12000000,
+                        price: 11500000,
                         // profit_percentage: 10.0,
                         ..Default::default()
                     },
@@ -232,9 +236,24 @@ impl Weav3rMainScene {
             },
         );
 
-        let resp = weav3r::profit::calc_profit(self.favorites_res.clone(), profit_items);
-        self.favorites_res = resp.clone();
-        self.render_list(resp.user_profit_result);
+        let now = tools::time::get_current_time();
+
+        let (mut resp, has_new) = weav3r::profit::calc_profit(now, self.favorites_res.clone(), profit_items);
+        let sorted_user_profit_result = weav3r::profit::sort_profit(
+            weav3r::profit::SortProfitParams { recent_sec: 30 },
+            resp.user_profit_result,
+        );
+
+        if has_new {
+            godot_print!("Weav3rMainScene: Has new data.");
+            if let Some(audio_player) = self.audio_player.as_mut() {
+                audio_player.play();
+            }
+        }
+
+        resp.user_profit_result = sorted_user_profit_result.clone();
+        self.favorites_res = resp;
+        self.render_list(sorted_user_profit_result);
     }
 
     fn render_list(&mut self, items: Vec<ProfitUserInfo>) {
@@ -269,7 +288,6 @@ impl Weav3rMainScene {
             };
             item_node.bind_mut().set_item(item);
             let child = item_node.upcast::<Node>();
-            // vbox.add_child(Some(&child));
             grid_container.add_child(Some(&child));
         }
     }

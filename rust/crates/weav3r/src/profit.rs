@@ -1,5 +1,3 @@
-use std::time::{SystemTime, UNIX_EPOCH};
-
 use crate::favorite::{FavoritesResponse, ProductionItem};
 
 #[derive(Debug, Clone, Default)]
@@ -182,9 +180,39 @@ pub fn filter(favorites_response: FavoritesResponse, filter: Filter) -> Vec<Prof
     items
 }
 
+pub struct SortProfitParams {
+    pub recent_sec: u64,
+}
+
+/// 按利润排序，前 sec 秒的利润排序，然后是老的利润排序
+pub fn sort_profit(
+    params: SortProfitParams,
+    items: Vec<ProfitUserInfo>,
+) -> Vec<ProfitUserInfo> {
+    let now =tools::time::get_current_time();
+    let recent_sec = now - params.recent_sec;
+    let mut recent_items: Vec<ProfitUserInfo> = items
+        .clone()
+        .into_iter()
+        .filter(|x| x.created_on >= recent_sec)
+        .collect();
+    recent_items.sort_by(|a, b| b.profit_total_value.cmp(&a.profit_total_value));
+
+    let mut old_items: Vec<ProfitUserInfo> = items
+        .clone()
+        .into_iter()
+        .filter(|x| x.created_on < recent_sec)
+        .collect();
+    old_items.sort_by(|a, b| b.profit_total_value.cmp(&a.profit_total_value));
+
+    recent_items.extend(old_items);
+    recent_items
+}
+
 // 计算利润
-pub fn calc_profit(old: FavoritesRes, profit_items_new: Vec<ProfitInfo>) -> FavoritesRes {
+pub fn calc_profit(now: u64, old: FavoritesRes, profit_items_new: Vec<ProfitInfo>) -> (FavoritesRes,bool) {
     let mut user_profit_result: Vec<ProfitUserInfo> = Vec::new();
+    let mut has_new = false;
 
     // 统计数据
     for item in profit_items_new.iter() {
@@ -194,14 +222,12 @@ pub fn calc_profit(old: FavoritesRes, profit_items_new: Vec<ProfitInfo>) -> Favo
         {
             res.items.push(item.clone());
         } else {
+            has_new = true;
             user_profit_result.push(ProfitUserInfo {
                 player_id: item.player_id,
                 player_name: item.player_name.clone(),
                 items: vec![item.clone()],
-                created_on: SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap_or_default()
-                    .as_secs(),
+                created_on: now,
                 ..Default::default()
             });
         }
@@ -228,11 +254,9 @@ pub fn calc_profit(old: FavoritesRes, profit_items_new: Vec<ProfitInfo>) -> Favo
         }
     }
 
-    user_profit_result.sort_by(|a, b| b.profit_total_value.cmp(&a.profit_total_value));
-
-    FavoritesRes {
+    (FavoritesRes {
         profit_items_new: profit_items_new.clone(),
         profit_items_old: old.profit_items_new.clone(),
         user_profit_result,
-    }
+    }, has_new)
 }

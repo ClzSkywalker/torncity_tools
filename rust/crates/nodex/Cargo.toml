@@ -6,5 +6,8 @@ edition = "2024"
 [dependencies]
 weav3r.workspace = true
 tools.workspace = true
+model.workspace = true
 
 godot.workspace = true
+serde.workspace = true
+serde_json.workspace = true
