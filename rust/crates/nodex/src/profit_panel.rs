@@ -216,7 +216,7 @@ impl ProfitPanel {
 pub struct ProfitItem {
     pub label: String,
     pub single_value: i32,
-    pub total_value: i32,
+    pub total_value: i64,
     pub percentage: f32,
     #[base]
     base: Base<Control>,
@@ -245,7 +245,7 @@ impl ProfitItem {
         &mut self,
         label: String,
         single_value: i32,
-        total_value: i32,
+        total_value: i64,
         percentage: f32,
     ) {
         self.label = label;

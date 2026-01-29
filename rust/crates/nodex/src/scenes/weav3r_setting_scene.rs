@@ -67,7 +67,7 @@ impl IControl for Weav3rSettingScene {
             godot_error!("Weav3rSettingScene: ProfitPercentEdit node not found.");
         }
         if let Some(min_profit_edit) = self.min_profit_edit.as_mut() {
-            let min_profit = cfg.read_config_i32(
+            let min_profit = cfg.read_config_i64(
                 Weav3rSettingData::SECTION,
                 Weav3rSettingData::KEY_MIN_PROFIT,
                 Weav3rSettingData::DEFAULT_MIN_PROFIT,
@@ -150,6 +150,13 @@ impl Weav3rSettingScene {
                 Weav3rSettingData::SECTION,
                 Weav3rSettingData::KEY_FILTER_IDS,
                 &filter_id.to_string(),
+            );
+        }
+        if let Err(err) = cfg.save() {
+            godot_error!(
+                "Weav3rSettingScene: Failed to save {:?}: {:?}",
+                Weav3rSettingData::SETTINGS_PATH,
+                err
             );
         }
         let Some(mut tree) = self.base().get_tree() else {
