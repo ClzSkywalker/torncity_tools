@@ -1,6 +1,5 @@
 use crate::{
-    node::prelude::*, prelude::Weav3rItem,
-    scenes::weav3r_setting_scene::Weav3rSettingScene,
+    node::prelude::*, prelude::Weav3rItem, scenes::weav3r_setting_scene::Weav3rSettingScene,
 };
 use godot::{
     classes::{
@@ -194,66 +193,32 @@ impl Weav3rMainScene {
             Weav3rSettingData::KEY_PROFIT_PERCENT,
             Weav3rSettingData::DEFAULT_PROFIT_PERCENT,
         );
-        let profit_minimum_value = cfg.read_config_i32(
+        let profit_minimum_value = cfg.read_config_i64(
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_MIN_PROFIT,
             Weav3rSettingData::DEFAULT_MIN_PROFIT,
         );
 
+        self.favorites_res.filter.min_profit = profit_minimum_value;
+        self.favorites_res.filter.min_profit_percentage = profit_percentage as f32;
+
         let response_text = String::from_utf8_lossy(body.as_slice());
-        let Ok(favorites_response) = weav3r::favorite::parse_favorites_response(&response_text)
+        let Ok(favorites_response) =
+            model::weav3r::favorites::FavoritesResponse::from_text(&response_text)
         else {
             godot_error!("Weav3rMainScene: Failed to parse favorites response.");
             return;
         };
 
-        let profit_items = weav3r::profit::filter(
-            favorites_response,
-            weav3r::profit::Filter {
-                min_profit: profit_minimum_value,
-                min_profit_percentage: profit_percentage as f32,
-                ignore_names: vec![],
-                filter_items: vec![
-                    weav3r::profit::FilterItem {
-                        name: "Xanax".to_string(),
-                        price: 800000,
-                        // profit_percentage: 10.0,
-                        ..Default::default()
-                    },
-                    weav3r::profit::FilterItem {
-                        name: "Donator Pack".to_string(),
-                        price: 23000000,
-                        // profit_percentage: 10.0,
-                        ..Default::default()
-                    },
-                    weav3r::profit::FilterItem {
-                        name: "Feathery Hotel Coupon".to_string(),
-                        price: 11500000,
-                        // profit_percentage: 10.0,
-                        ..Default::default()
-                    },
-                ],
-            },
-        );
+        self.favorites_res.set_new_profit(favorites_response.items);
 
-        let now = tools::time::get_current_time();
-
-        let (mut resp, has_new) = weav3r::profit::calc_profit(now, self.favorites_res.clone(), profit_items);
-        let sorted_user_profit_result = weav3r::profit::sort_profit(
-            weav3r::profit::SortProfitParams { recent_sec: 30 },
-            resp.user_profit_result,
-        );
-
-        if has_new {
+        if self.favorites_res.has_new {
             godot_print!("Weav3rMainScene: Has new data.");
             if let Some(audio_player) = self.audio_player.as_mut() {
                 audio_player.play();
             }
         }
-
-        resp.user_profit_result = sorted_user_profit_result.clone();
-        self.favorites_res = resp;
-        self.render_list(sorted_user_profit_result);
+        self.render_list(self.favorites_res.user_profit_result.clone());
     }
 
     fn render_list(&mut self, items: Vec<ProfitUserInfo>) {

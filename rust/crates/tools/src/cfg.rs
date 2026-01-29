@@ -33,6 +33,10 @@ impl CfgTool {
         self.read_config(section, key, default)
     }
 
+    pub fn read_config_u64(&self, section: &str, key: &str, default: u64) -> u64 {
+        self.read_config(section, key, default)
+    }
+
     pub fn read_config_string(&self, section: &str, key: &str, default: &str) -> String {
         let value: GString = self.read_config(section, key, GString::from(default));
         value.to_string()
@@ -48,6 +52,15 @@ impl CfgTool {
 
     pub fn write_config_string(&mut self, section: &str, key: &str, value: &str) {
         self.write_config(section, key, GString::from(value))
+    }
+
+    pub fn save(&mut self) -> Result<(), godot::global::Error> {
+        let err = self.file.save(&self.config_path);
+        if err == godot::global::Error::OK {
+            Ok(())
+        } else {
+            Err(err)
+        }
     }
 
     fn read_config<T>(&self, section: &str, key: &str, default: T) -> T
