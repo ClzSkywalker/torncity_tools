@@ -7,6 +7,7 @@ pub struct FavoritesRes {
     pub profit_items_new: Vec<ProfitInfo>,
     pub profit_items_old: Vec<ProfitInfo>,
     pub user_profit_result: Vec<ProfitUserInfo>,
+    /// 是否有新增用户
     pub has_new: bool,
 }
 

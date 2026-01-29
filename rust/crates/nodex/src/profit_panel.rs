@@ -4,11 +4,9 @@ use godot::{
     prelude::*,
 };
 use std::hash::{Hash, Hasher};
-use tools::node::INodeFunc;
+use tools::node::{INodeFunc, INodeTool};
 use weav3r::profit::ProfitInfo;
 
-const LABEL_NAME: &str = "%Name";
-const LABEL_QUANTITY: &str = "%Quantity";
 const ICON_PATH: &str = "%Icon";
 const ICON_REQUEST_PATH: &str = "IconRequest";
 const ICON_CACHE_DIR: &str = "user://icon_cache";
@@ -19,6 +17,62 @@ pub struct ProfitPanel {
     pub item: ProfitInfo,
     #[base]
     base: Base<PanelContainer>,
+    name_label: Option<Gd<Label>>,
+    quantity_label: Option<Gd<Label>>,
+    icon: Option<Gd<TextureRect>>,
+    icon_request: Option<Gd<HttpRequest>>,
+}
+
+#[godot_api]
+impl IPanelContainer for ProfitPanel {
+    fn ready(&mut self) {
+        self.name_label = self.get_node_as::<Label>("%Name");
+        self.quantity_label = self.get_node_as::<Label>("%Quantity");
+        self.icon = self.get_node_as::<TextureRect>("%Icon");
+        self.icon_request = self.get_node_as::<HttpRequest>("IconRequest");
+
+        self.load_icon();
+
+        let mut vbox = self
+            .base()
+            .get_node_as::<VBoxContainer>("HBoxContainer/VBox");
+
+        let Some(mut profit_item) = ProfitItem::get_scene_instance() else {
+            godot_error!("ProfitPanel: Failed to instantiate profit_item_scene");
+            return;
+        };
+        profit_item.bind_mut().set_value(
+            "Final Profit".to_string(),
+            self.item.profit_single_value,
+            self.item.profit_total_value,
+            self.item.profit_percentage,
+        );
+        vbox.add_child(Some(&profit_item.upcast::<Node>()));
+
+        let Some(mut profit_item) = ProfitItem::get_scene_instance() else {
+            godot_error!("ProfitPanel: Failed to get profit_item_scene");
+            return;
+        };
+        profit_item.bind_mut().set_value(
+            "Market Profit".to_string(),
+            self.item.market_profit_single_value,
+            self.item.market_profit_total_value,
+            self.item.market_profit_percentage,
+        );
+        vbox.add_child(Some(&profit_item.upcast::<Node>()));
+
+        let Some(mut profit_item) = ProfitItem::get_scene_instance() else {
+            godot_error!("ProfitPanel: Failed to get profit_item_scene");
+            return;
+        };
+        profit_item.bind_mut().set_value(
+            "Avg Bazaar Profit".to_string(),
+            self.item.avg_bazaar_profit_single_value,
+            self.item.avg_bazaar_profit_total_value,
+            self.item.avg_bazaar_profit_percentage,
+        );
+        vbox.add_child(Some(&profit_item.upcast::<Node>()));
+    }
 }
 
 impl INodeFunc for ProfitPanel {
@@ -30,16 +84,6 @@ impl INodeFunc for ProfitPanel {
 impl ProfitPanel {
     pub fn set_item(&mut self, item: ProfitInfo) {
         self.item = item;
-    }
-
-    pub fn name() -> &'static str {
-        "%Name"
-    }
-    pub fn quantity() -> &'static str {
-        "%Quantity"
-    }
-    pub fn vbox() -> &'static str {
-        "HBoxContainer/VBox"
     }
 
     fn load_icon(&mut self) {
@@ -126,58 +170,6 @@ impl ProfitPanel {
 }
 
 #[godot_api]
-impl IPanelContainer for ProfitPanel {
-    fn ready(&mut self) {
-        self.base()
-            .get_node_as::<Label>(LABEL_NAME)
-            .set_text(format!("Name:{}", self.item.name).as_str());
-        self.base()
-            .get_node_as::<Label>(LABEL_QUANTITY)
-            .set_text(format!("Quantity:{}", self.item.quantity).as_str());
-
-        self.load_icon();
-
-        let mut vbox = self.base().get_node_as::<VBoxContainer>(Self::vbox());
-
-        let Some(mut profit_item) = ProfitItem::instance() else {
-            godot_error!("ProfitPanel: Failed to instantiate profit_item_scene");
-            return;
-        };
-        profit_item.bind_mut().set_value(
-            "Final Profit".to_string(),
-            self.item.profit_single_value,
-            self.item.profit_total_value,
-            self.item.profit_percentage,
-        );
-        vbox.add_child(Some(&profit_item.upcast::<Node>()));
-
-        let Some(mut profit_item) = ProfitItem::instance() else {
-            godot_error!("ProfitPanel: Failed to instantiate profit_item_scene");
-            return;
-        };
-        profit_item.bind_mut().set_value(
-            "Market Profit".to_string(),
-            self.item.market_profit_single_value,
-            self.item.market_profit_total_value,
-            self.item.market_profit_percentage,
-        );
-        vbox.add_child(Some(&profit_item.upcast::<Node>()));
-
-        let Some(mut profit_item) = ProfitItem::instance() else {
-            godot_error!("ProfitPanel: Failed to instantiate profit_item_scene");
-            return;
-        };
-        profit_item.bind_mut().set_value(
-            "Avg Bazaar Profit".to_string(),
-            self.item.avg_bazaar_profit_single_value,
-            self.item.avg_bazaar_profit_total_value,
-            self.item.avg_bazaar_profit_percentage,
-        );
-        vbox.add_child(Some(&profit_item.upcast::<Node>()));
-    }
-}
-
-#[godot_api]
 impl ProfitPanel {
     #[func]
     fn on_icon_request_completed(
@@ -222,6 +214,24 @@ pub struct ProfitItem {
     base: Base<Control>,
 }
 
+#[godot_api]
+impl IControl for ProfitItem {
+    fn ready(&mut self) {
+        self.base()
+            .get_node_as::<Label>("%Label")
+            .set_text(format!("Name:{}", self.label).as_str());
+        self.base()
+            .get_node_as::<Label>("%ProfitSingleValue")
+            .set_text(format!("Value:{}", self.single_value).as_str());
+        self.base()
+            .get_node_as::<Label>("%ProfitTotalValue")
+            .set_text(format!("Profit:{}", self.total_value).as_str());
+        self.base()
+            .get_node_as::<Label>("%ProfitPercent")
+            .set_text(format!("Percentage:{:.2}%", self.percentage).as_str());
+    }
+}
+
 impl INodeFunc for ProfitItem {
     fn node_path() -> &'static str {
         "res://scenes/profit_item.tscn"
@@ -229,18 +239,6 @@ impl INodeFunc for ProfitItem {
 }
 
 impl ProfitItem {
-    fn label_name() -> &'static str {
-        "%Label"
-    }
-    fn profit_single_value() -> &'static str {
-        "%ProfitSingleValue"
-    }
-    fn profit_total_value() -> &'static str {
-        "%ProfitTotalValue"
-    }
-    fn profit_percentage() -> &'static str {
-        "%ProfitPercent"
-    }
     pub fn set_value(
         &mut self,
         label: String,
@@ -252,42 +250,5 @@ impl ProfitItem {
         self.single_value = single_value;
         self.total_value = total_value;
         self.percentage = percentage;
-    }
-
-    pub fn instance() -> Option<Gd<ProfitItem>> {
-        let Some(profit_item_scene) = ResourceLoader::singleton()
-            .load(ProfitItem::node_path())
-            .and_then(|res| res.try_cast::<PackedScene>().ok())
-        else {
-            godot_error!("ProfitItem: Failed to load profit_item_scene");
-            return None;
-        };
-        let Some(profit_item) = profit_item_scene.instantiate() else {
-            godot_error!("ProfitItem: Failed to instantiate profit_item_scene");
-            return None;
-        };
-        let Ok(profit_item) = profit_item.try_cast::<ProfitItem>() else {
-            godot_error!("ProfitItem: Instance is not ProfitItem");
-            return None;
-        };
-        Some(profit_item)
-    }
-}
-
-#[godot_api]
-impl IControl for ProfitItem {
-    fn ready(&mut self) {
-        self.base()
-            .get_node_as::<Label>(Self::label_name())
-            .set_text(format!("Name:{}", self.label).as_str());
-        self.base()
-            .get_node_as::<Label>(Self::profit_single_value())
-            .set_text(format!("Value:{}", self.single_value).as_str());
-        self.base()
-            .get_node_as::<Label>(Self::profit_total_value())
-            .set_text(format!("Profit:{}", self.total_value).as_str());
-        self.base()
-            .get_node_as::<Label>(Self::profit_percentage())
-            .set_text(format!("Percentage:{:.2}%", self.percentage).as_str());
     }
 }

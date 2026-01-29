@@ -2,10 +2,7 @@ use crate::{
     node::prelude::*, prelude::Weav3rItem, scenes::weav3r_setting_scene::Weav3rSettingScene,
 };
 use godot::{
-    classes::{
-        AudioStreamPlayer, Button, Control, GridContainer, IControl, Node, PackedScene,
-        ResourceLoader, Timer,
-    },
+    classes::{AudioStreamPlayer, Button, Control, GridContainer, IControl, Node, Timer},
     global::Error,
     prelude::*,
 };
@@ -29,22 +26,14 @@ pub struct Weav3rMainScene {
     audio_player: Option<Gd<AudioStreamPlayer>>,
 }
 
-impl Weav3rMainScene {
-    const BUTTON_PATH: &str = "Button";
-    const HTTP_REQUEST_PATH: &str = "HTTPRequest";
-    const GRID_CONTAINER_PATH: &str = "ScrollContainer/GridContainer";
-    const TIMER_PATH: &str = "Timer";
-    const SETTINGS_BUTTON_PATH: &str = "%SettingsButton";
-}
-
 #[godot_api]
 impl IControl for Weav3rMainScene {
     fn ready(&mut self) {
-        self.button = self.get_node_as::<Button>(Self::BUTTON_PATH);
-        self.timer = self.get_node_as::<Timer>(Self::TIMER_PATH);
-        self.http_request = self.get_node_as::<Weav3rHttpRequest>(Self::HTTP_REQUEST_PATH);
-        self.grid_container = self.get_node_as::<GridContainer>(Self::GRID_CONTAINER_PATH);
-        self.settings_button = self.get_node_as::<Button>(Self::SETTINGS_BUTTON_PATH);
+        self.button = self.get_node_as::<Button>("Button");
+        self.timer = self.get_node_as::<Timer>("Timer");
+        self.http_request = self.get_node_as::<Weav3rHttpRequest>("HTTPRequest");
+        self.grid_container = self.get_node_as::<GridContainer>("ScrollContainer/GridContainer");
+        self.settings_button = self.get_node_as::<Button>("%SettingsButton");
 
         if let Some(button) = &self.button {
             let button = button.clone();
@@ -75,11 +64,8 @@ impl IControl for Weav3rMainScene {
             }
         };
 
-        let interval = cfg.read_config_f64(
-            Weav3rSettingData::SECTION,
-            Weav3rSettingData::KEY_INTERVAL,
-            Weav3rSettingData::DEFAULT_INTERVAL,
-        );
+        let setting_data = Weav3rSettingData::new(cfg);
+        let interval = setting_data.get_interval();
 
         if let Some(timer) = self.timer.as_mut() {
             let mut timer = timer.clone();
@@ -92,7 +78,8 @@ impl IControl for Weav3rMainScene {
             godot_error!("Weav3rMainScene: Timer node not found.");
         }
 
-        if let Some(settings_button) = self.get_node_as::<Button>(Self::SETTINGS_BUTTON_PATH) {
+        if let Some(settings_button) = self.settings_button.as_mut() {
+            let settings_button = settings_button.clone();
             settings_button
                 .signals()
                 .pressed()
@@ -100,6 +87,9 @@ impl IControl for Weav3rMainScene {
         } else {
             godot_error!("Weav3rMainScene: SettingsButton node not found.");
         }
+
+        // 启动时先请求一次
+        self.on_button_pressed();
     }
 }
 
@@ -124,22 +114,18 @@ impl Weav3rMainScene {
                 return;
             }
         };
-        let filter_id_text = cfg.read_config_string(
-            Weav3rSettingData::SECTION,
-            Weav3rSettingData::KEY_FILTER_IDS,
-            Weav3rSettingData::DEFAULT_FILTER_IDS,
-        );
+        let setting_data = Weav3rSettingData::new(cfg);
+        let filter_id_text = setting_data.get_filter_ids();
         if filter_id_text.trim().is_empty() {
             godot_error!("Weav3rMainScene: FilterIdEdit is empty.");
             return;
         }
         let target_ids = filter_id_text.split(',').collect::<Vec<&str>>().join(",");
 
-        let Some(mut http) = self.get_node_as::<Weav3rHttpRequest>(Self::HTTP_REQUEST_PATH) else {
+        let Some(http) = self.http_request.as_mut() else {
             godot_error!("Weav3rMainScene: HTTPRequest node not found.");
             return;
         };
-
         http.bind_mut().send_request(GString::from(&target_ids));
     }
 
@@ -188,16 +174,9 @@ impl Weav3rMainScene {
             }
         };
 
-        let profit_percentage = cfg.read_config_f64(
-            Weav3rSettingData::SECTION,
-            Weav3rSettingData::KEY_PROFIT_PERCENT,
-            Weav3rSettingData::DEFAULT_PROFIT_PERCENT,
-        );
-        let profit_minimum_value = cfg.read_config_i64(
-            Weav3rSettingData::SECTION,
-            Weav3rSettingData::KEY_MIN_PROFIT,
-            Weav3rSettingData::DEFAULT_MIN_PROFIT,
-        );
+        let setting_data = Weav3rSettingData::new(cfg);
+        let profit_percentage = setting_data.get_profit_percent();
+        let profit_minimum_value = setting_data.get_min_profit();
 
         self.favorites_res.filter.min_profit = profit_minimum_value;
         self.favorites_res.filter.min_profit_percentage = profit_percentage as f32;
@@ -212,27 +191,20 @@ impl Weav3rMainScene {
 
         self.favorites_res.set_new_profit(favorites_response.items);
 
-        if self.favorites_res.has_new {
-            godot_print!("Weav3rMainScene: Has new data.");
-            if let Some(audio_player) = self.audio_player.as_mut() {
-                audio_player.play();
-            }
+        if !self.favorites_res.has_new {
+            return;
+        }
+
+        godot_print!("Weav3rMainScene: Has new data.");
+        if let Some(audio_player) = self.audio_player.as_mut() {
+            audio_player.play();
         }
         self.render_list(self.favorites_res.user_profit_result.clone());
     }
 
     fn render_list(&mut self, items: Vec<ProfitUserInfo>) {
-        let Some(mut grid_container) = self.get_node_as::<GridContainer>(Self::GRID_CONTAINER_PATH)
-        else {
+        let Some(grid_container) = self.grid_container.as_mut() else {
             godot_error!("Weav3rMainScene: GridContainer node not found.");
-            return;
-        };
-
-        let Some(scene) = ResourceLoader::singleton()
-            .load("res://scenes/weav3r_item.tscn")
-            .and_then(|res| res.try_cast::<PackedScene>().ok())
-        else {
-            godot_error!("Weav3rMainScene: Failed to load weav3r_item.tscn");
             return;
         };
 
@@ -243,16 +215,12 @@ impl Weav3rMainScene {
         }
 
         for item in items {
-            let Some(node) = scene.instantiate() else {
-                godot_error!("Weav3rMainScene: Failed to instance Weav3rItem");
+            let Some(mut weav3r_item) = Weav3rItem::get_scene_instance() else {
+                godot_error!("Weav3rMainScene: Failed to get Weav3rItem");
                 continue;
             };
-            let Ok(mut item_node) = node.try_cast::<Weav3rItem>() else {
-                godot_error!("Weav3rMainScene: Instance is not Weav3rItem");
-                continue;
-            };
-            item_node.bind_mut().set_item(item);
-            let child = item_node.upcast::<Node>();
+            weav3r_item.bind_mut().set_item(item);
+            let child = weav3r_item.upcast::<Node>();
             grid_container.add_child(Some(&child));
         }
     }

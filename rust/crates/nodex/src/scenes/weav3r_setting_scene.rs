@@ -45,43 +45,29 @@ impl IControl for Weav3rSettingScene {
             }
         };
 
+        let setting_data = Weav3rSettingData::new(cfg);
+
         // 检查节点是否都找到了
         if let Some(interval_edit) = self.interval_edit.as_mut() {
-            let interval = cfg.read_config_f64(
-                Weav3rSettingData::SECTION,
-                Weav3rSettingData::KEY_INTERVAL,
-                Weav3rSettingData::DEFAULT_INTERVAL,
-            );
+            let interval = setting_data.get_interval();
             interval_edit.set_text(format!("{:.2}", interval).as_str());
         } else {
             godot_error!("Weav3rSettingScene: IntervalEdit node not found.");
         }
         if let Some(profit_percent_edit) = self.profit_percent_edit.as_mut() {
-            let profit_percent = cfg.read_config_f64(
-                Weav3rSettingData::SECTION,
-                Weav3rSettingData::KEY_PROFIT_PERCENT,
-                Weav3rSettingData::DEFAULT_PROFIT_PERCENT,
-            );
+            let profit_percent = setting_data.get_profit_percent();
             profit_percent_edit.set_text(format!("{:.2}", profit_percent).as_str());
         } else {
             godot_error!("Weav3rSettingScene: ProfitPercentEdit node not found.");
         }
         if let Some(min_profit_edit) = self.min_profit_edit.as_mut() {
-            let min_profit = cfg.read_config_i64(
-                Weav3rSettingData::SECTION,
-                Weav3rSettingData::KEY_MIN_PROFIT,
-                Weav3rSettingData::DEFAULT_MIN_PROFIT,
-            );
+            let min_profit = setting_data.get_min_profit();
             min_profit_edit.set_text(format!("{}", min_profit).as_str());
         } else {
             godot_error!("Weav3rSettingScene: MinProfitEdit node not found.");
         }
         if let Some(filter_id_edit) = self.filter_id_edit.as_mut() {
-            let filter_id = cfg.read_config_string(
-                Weav3rSettingData::SECTION,
-                Weav3rSettingData::KEY_FILTER_IDS,
-                Weav3rSettingData::DEFAULT_FILTER_IDS,
-            );
+            let filter_id = setting_data.get_filter_ids();
             filter_id_edit.set_text(filter_id.as_str());
         } else {
             godot_error!("Weav3rSettingScene: FilterIdEdit node not found.");
@@ -109,7 +95,7 @@ impl INodeFunc for Weav3rSettingScene {
 impl Weav3rSettingScene {
     #[func]
     fn on_save_pressed(&mut self) {
-        let mut cfg = match CfgTool::new(Weav3rSettingData::SETTINGS_PATH) {
+        let cfg = match CfgTool::new(Weav3rSettingData::SETTINGS_PATH) {
             Ok(r) => r,
             Err(err) => {
                 godot_error!(
@@ -120,39 +106,24 @@ impl Weav3rSettingScene {
                 return;
             }
         };
+        let mut setting_data = Weav3rSettingData::new(cfg);
         if let Some(interval_edit) = &self.interval_edit {
             let interval = interval_edit.get_text().to_float();
-            cfg.write_config_f64(
-                Weav3rSettingData::SECTION,
-                Weav3rSettingData::KEY_INTERVAL,
-                interval,
-            );
+            setting_data.set_interval(interval);
         }
         if let Some(profit_percent_edit) = &self.profit_percent_edit {
             let profit_percent = profit_percent_edit.get_text().to_float();
-            cfg.write_config_f64(
-                Weav3rSettingData::SECTION,
-                Weav3rSettingData::KEY_PROFIT_PERCENT,
-                profit_percent,
-            );
+            setting_data.set_profit_percent(profit_percent);
         }
         if let Some(min_profit_edit) = &self.min_profit_edit {
             let min_profit = min_profit_edit.get_text().to_int();
-            cfg.write_config_i32(
-                Weav3rSettingData::SECTION,
-                Weav3rSettingData::KEY_MIN_PROFIT,
-                min_profit as i32,
-            );
+            setting_data.set_min_profit(min_profit);
         }
         if let Some(filter_id_edit) = &self.filter_id_edit {
             let filter_id = filter_id_edit.get_text().strip_edges(true, true);
-            cfg.write_config_string(
-                Weav3rSettingData::SECTION,
-                Weav3rSettingData::KEY_FILTER_IDS,
-                &filter_id.to_string(),
-            );
+            setting_data.set_filter_ids(&filter_id.to_string());
         }
-        if let Err(err) = cfg.save() {
+        if let Err(err) = setting_data.save() {
             godot_error!(
                 "Weav3rSettingScene: Failed to save {:?}: {:?}",
                 Weav3rSettingData::SETTINGS_PATH,

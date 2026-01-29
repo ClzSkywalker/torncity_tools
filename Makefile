@@ -18,6 +18,9 @@ EXPORT_PATH ?= $(EXPORT_DIR_ABS)/$(EXPORT_NAME)$(EXPORT_EXT)
 build:
 	cargo build -p $(RUST_CRATE) --manifest-path $(RUST_MANIFEST)
 
+clippy:
+	cargo clippy -p $(RUST_CRATE) --manifest-path $(RUST_MANIFEST)
+
 check-export-presets:
 	@test -f $(GODOT_PROJECT_DIR)/export_presets.cfg || ( \
 		echo "missing $(GODOT_PROJECT_DIR)/export_presets.cfg"; \
