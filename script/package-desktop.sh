@@ -1,6 +1,5 @@
 #!/bin/bash
-# package-release.sh - 打包发布版本
-# 等同于 Makefile 中的 package-release 指令
+# package-desktop.sh - 打包桌面版本
 
 set -e  # 遇到错误立即退出
 
@@ -95,9 +94,9 @@ godot_export_release() {
     "$GODOT_BIN" --headless --path "$GODOT_PROJECT_DIR" --export-release "$EXPORT_PRESET" "$EXPORT_PATH"
 }
 
-# 主流程：package-release
+# 主流程：package-desktop
 main() {
-    echo "=== 开始打包发布版本 ==="
+    echo "=== 开始打包桌面版本 ==="
     echo "项目根目录: $PROJECT_ROOT"
     echo "导出预设: $EXPORT_PRESET"
     echo "导出路径: $EXPORT_PATH"
@@ -107,7 +106,7 @@ main() {
     godot_export_release
 
     echo ""
-    echo "=== 打包完成 ==="
+    echo "=== 桌面打包完成 ==="
     echo "输出位置: $EXPORT_PATH"
 }
 
