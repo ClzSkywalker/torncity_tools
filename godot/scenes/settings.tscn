@@ -1,76 +1,99 @@
-[gd_scene load_steps=2 format=3 uid="uid://dc6rmp6pgl6m8"]
+[gd_scene format=3 uid="uid://dc6rmp6pgl6m8"]
 
-[node name="Settings" type="Weav3rSettingScene"]
-layout_mode = 3
+[node name="Settings" type="Weav3rSettingScene" unique_id=1317930909]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TopBar" type="VBoxContainer" parent="." unique_id=188358475]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TopBar" type="VBoxContainer" parent="."]
-custom_minimum_size = Vector2(300, 0)
-layout_mode = 0
-offset_right = 227.0
-offset_bottom = 267.0
-
-[node name="SaveButton" type="Button" parent="TopBar"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 50)
-layout_mode = 2
-size_flags_horizontal = 0
-text = "保存并返回"
-
-[node name="InternalVBox" type="HBoxContainer" parent="TopBar"]
+[node name="InternalVBox" type="HBoxContainer" parent="TopBar" unique_id=686418141]
 layout_mode = 2
 
-[node name="IntervalLabel" type="Label" parent="TopBar/InternalVBox"]
+[node name="IntervalLabel" type="Label" parent="TopBar/InternalVBox" unique_id=192457143]
 layout_mode = 2
+size_flags_horizontal = 2
 text = "Interval(s): "
 
-[node name="IntervalEdit" type="TextEdit" parent="TopBar/InternalVBox"]
+[node name="IntervalEdit" type="SpinBox" parent="TopBar/InternalVBox" unique_id=2116784401]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-text = "5"
+size_flags_horizontal = 10
+value = 5.0
+rounded = true
 
-[node name="ProfitPercentVBox" type="HBoxContainer" parent="TopBar"]
+[node name="AudioVBox" type="HBoxContainer" parent="TopBar" unique_id=1213435087]
 layout_mode = 2
 
-[node name="ProfitPercentLabel" type="Label" parent="TopBar/ProfitPercentVBox"]
+[node name="Label" type="Label" parent="TopBar/AudioVBox" unique_id=20558396]
 layout_mode = 2
+size_flags_horizontal = 2
+text = "Audio:"
+
+[node name="CheckButton" type="CheckButton" parent="TopBar/AudioVBox" unique_id=474081469]
+layout_mode = 2
+size_flags_horizontal = 10
+button_pressed = true
+
+[node name="ProfitPercentVBox" type="HBoxContainer" parent="TopBar" unique_id=1370609047]
+layout_mode = 2
+
+[node name="ProfitPercentLabel" type="Label" parent="TopBar/ProfitPercentVBox" unique_id=426619834]
+layout_mode = 2
+size_flags_horizontal = 2
 text = "Profit Percent: "
 
-[node name="ProfitPercentEdit" type="TextEdit" parent="TopBar/ProfitPercentVBox"]
+[node name="ProfitPercentEdit" type="SpinBox" parent="TopBar/ProfitPercentVBox" unique_id=2118192040]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-text = "1"
+step = 0.1
+value = 4.0
 
-[node name="MinProfitVBox" type="HBoxContainer" parent="TopBar"]
+[node name="MinProfitVBox" type="HBoxContainer" parent="TopBar" unique_id=901387988]
 layout_mode = 2
 
-[node name="MinProfitLabel" type="Label" parent="TopBar/MinProfitVBox"]
+[node name="MinProfitLabel" type="Label" parent="TopBar/MinProfitVBox" unique_id=240777899]
 layout_mode = 2
+size_flags_horizontal = 3
 text = "Minimum profit"
 
-[node name="MinProfitEdit" type="TextEdit" parent="TopBar/MinProfitVBox"]
+[node name="MinProfitEdit" type="SpinBox" parent="TopBar/MinProfitVBox" unique_id=2072351256]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(100, 40)
 layout_mode = 2
-text = "10000"
+size_flags_horizontal = 3
+max_value = 999999999.0
+step = 1000.0
+value = 100000.0
+rounded = true
 
-[node name="FilterIdVBox" type="HBoxContainer" parent="TopBar"]
+[node name="FilterIdVBox" type="VBoxContainer" parent="TopBar" unique_id=341354117]
 layout_mode = 2
 
-[node name="FilterIdLabel" type="Label" parent="TopBar/FilterIdVBox"]
+[node name="FilterIdLabel" type="Label" parent="TopBar/FilterIdVBox" unique_id=499545483]
 layout_mode = 2
 size_flags_vertical = 0
-text = "ids"
+text = "ids:"
 
-[node name="FilterIdEdit" type="TextEdit" parent="TopBar/FilterIdVBox"]
+[node name="FilterIdEdit" type="TextEdit" parent="TopBar/FilterIdVBox" unique_id=2043694490]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(250, 200)
 layout_mode = 2
 text = "385,183,97,902,901,904,129,184,260,903,263,617,272,264,271,267,277,282,276,186,187,215,261,618,273,258,266,268,269,281,274,384,533,555,532,554,530,553,987,986,985,206,586,587,151,556,529,528,36,527,310,35,210,39,37,209,38,541,552,542,638,551,531,550,818,283,370,364,1080,1079,1082,1083,1078,1081,367,366,1485,1486,1494,358"
 wrap_mode = 1
+
+[node name="SaveButton" type="Button" parent="TopBar" unique_id=1183874491]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Save "

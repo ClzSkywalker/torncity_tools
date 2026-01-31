@@ -72,3 +72,4 @@ structured_text_bidi_override = 1
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/separation = 4

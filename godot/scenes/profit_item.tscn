@@ -2,7 +2,6 @@
 
 [node name="ProfitItem" type="ProfitItem" unique_id=1137593024]
 custom_minimum_size = Vector2(0, 70)
-layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
@@ -13,11 +12,12 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 0
 
 [node name="Label" type="Label" parent="VBox" unique_id=336054901]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Market:"
+text = "Name: Final Profit"
 
 [node name="HBox" type="HBoxContainer" parent="VBox" unique_id=125076260]
 layout_mode = 2
@@ -26,6 +26,7 @@ size_flags_vertical = 0
 [node name="VBoxContainer" type="VBoxContainer" parent="VBox/HBox" unique_id=1222079709]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 0
 
 [node name="ProfitSingleValue" type="Label" parent="VBox/HBox/VBoxContainer" unique_id=483393979]
 unique_name_in_owner = true

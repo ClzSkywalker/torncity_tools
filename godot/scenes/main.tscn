@@ -1,61 +1,51 @@
-[gd_scene format=3 uid="uid://lok4nkfbntua"]
+[gd_scene format=3 uid="uid://oklyrp8n08cf"]
 
-[ext_resource type="Script" uid="uid://bwg5devwkrp03" path="res://scripts/timer_controller.gd" id="1_0wfyh"]
-[ext_resource type="Texture2D" uid="uid://cwl5vuqa3ycpg" path="res://assets/icons/setting.png" id="1_o5qli"]
+[ext_resource type="PackedScene" uid="uid://cqdj1oixx8i6" path="res://scenes/weav3r.tscn" id="1_o5qli"]
+[ext_resource type="PackedScene" uid="uid://dc6rmp6pgl6m8" path="res://scenes/settings.tscn" id="2_0wfyh"]
 
-[node name="Main" type="Weav3rMainScene" unique_id=26783944]
+[node name="Main" type="MainScene" unique_id=1776508967]
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1441816722]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Button" type="Button" parent="." unique_id=1167531862]
-custom_minimum_size = Vector2(100, 50)
-layout_mode = 0
-offset_right = 100.0
-offset_bottom = 50.0
-size_flags_horizontal = 0
-text = "按钮"
-
-[node name="TimerController" type="Button" parent="." unique_id=1109471785]
-layout_mode = 0
-offset_left = 1.0
-offset_top = 83.0
-offset_right = 137.0
-offset_bottom = 114.0
-text = "Timer Controller"
-script = ExtResource("1_0wfyh")
-
-[node name="HTTPRequest" type="Weav3rHttpRequest" parent="." unique_id=1779666125]
-
-[node name="Timer" type="Timer" parent="." unique_id=1997826532]
-wait_time = 5.0
-autostart = true
-
-[node name="SettingsButton" type="Button" parent="." unique_id=125949502]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 0
-offset_left = 109.0
-offset_top = 9.0
-offset_right = 167.0
-offset_bottom = 67.0
-size_flags_horizontal = 0
-icon = ExtResource("1_o5qli")
-
-[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=1640586356]
-layout_mode = 0
-offset_left = 206.0
-offset_top = 35.0
-offset_right = 1206.0
-offset_bottom = 646.0
-horizontal_scroll_mode = 0
-
-[node name="GridContainer" type="GridContainer" parent="ScrollContainer" unique_id=1537810279]
-custom_minimum_size = Vector2(1000, 0)
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer" unique_id=1495654062]
 layout_mode = 2
-size_flags_horizontal = 0
-theme_override_constants/h_separation = 0
-theme_override_constants/v_separation = 4
-columns = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="Weav3rPage" parent="VBoxContainer/MarginContainer" unique_id=1732906197 instance=ExtResource("1_o5qli")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Weav3rSettingPage" parent="VBoxContainer/MarginContainer" unique_id=1317930909 instance=ExtResource("2_0wfyh")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="BottomBar" type="PanelContainer" parent="VBoxContainer" unique_id=1080849690]
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/BottomBar" unique_id=2054654495]
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_constants/separation = 4
+
+[node name="Home" type="Button" parent="VBoxContainer/BottomBar/HBoxContainer" unique_id=1635188981]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Home"
+
+[node name="Setting" type="Button" parent="VBoxContainer/BottomBar/HBoxContainer" unique_id=466568820]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Setting"

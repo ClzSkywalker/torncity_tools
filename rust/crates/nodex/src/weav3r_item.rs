@@ -85,7 +85,13 @@ impl Weav3rItem {
             child.queue_free();
         }
 
-        for item in self.item.items.iter() {
+        for (i, item) in self.item.items.iter().enumerate() {
+            // 在非第一个元素前添加分隔线
+            if i > 0 {
+                let separator = HSeparator::new_alloc();
+                vbox.add_child(Some(&separator.upcast::<Node>()));
+            }
+
             let Some(mut profit_panel) = ProfitPanel::get_scene_instance() else {
                 godot_error!("Weav3rItem: Failed to get profit_panel");
                 return;

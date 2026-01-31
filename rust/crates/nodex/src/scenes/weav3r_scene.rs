@@ -18,6 +18,9 @@ pub struct Weav3rScene {
     audio_player: Option<Gd<AudioStreamPlayer>>,
     timer_controller: Option<Gd<Button>>,
     favorites_res: FavoritesRes,
+    /// 每个 item 的期望宽度（用于计算列数）
+    #[init(val = 300.0)]
+    item_width: f32,
 }
 
 #[godot_api]
@@ -64,8 +67,23 @@ impl IControl for Weav3rScene {
             godot_error!("Weav3rScene: Timer node not found.");
         }
 
+        if let Some(timer_controller) = self.timer_controller.as_mut() {
+            timer_controller
+                .clone()
+                .signals()
+                .pressed()
+                .connect_other(self, Self::on_timer_controller_pressed);
+        }
+
+        self.base()
+            .clone()
+            .signals()
+            .resized()
+            .connect_other(self, Self::on_resized);
+
         // 启动时先请求一次
         self.send_request();
+        self.update_columns();
     }
 }
 
@@ -155,7 +173,9 @@ impl Weav3rScene {
         }
 
         godot_print!("Weav3rScene: Has new data.");
-        if let Some(audio_player) = self.audio_player.as_mut() {
+        if let Some(audio_player) = self.audio_player.as_mut()
+            && setting_data.get_audio_switch()
+        {
             audio_player.play();
         }
         self.render_list(self.favorites_res.user_profit_result.clone());
@@ -181,6 +201,35 @@ impl Weav3rScene {
             weav3r_item.bind_mut().set_item(item);
             let child = weav3r_item.upcast::<Node>();
             grid_container.add_child(Some(&child));
+        }
+    }
+
+    #[func]
+    fn on_resized(&mut self) {
+        self.update_columns();
+    }
+
+    fn update_columns(&mut self) {
+        let available_width = self.base().get_size().x;
+        let columns = (available_width / self.item_width).max(1.0) as i32;
+
+        let Some(grid_container) = self.grid_container.as_mut() else {
+            return;
+        };
+        grid_container.set_columns(columns);
+    }
+
+    fn on_timer_controller_pressed(&mut self) {
+        if let Some(timer) = self.timer.as_mut() {
+            let is_paused = timer.is_paused();
+            timer.set_paused(!is_paused);
+            if let Some(timer_controller) = self.timer_controller.as_mut() {
+                timer_controller.set_text(if timer.is_paused() {
+                    "Start Request"
+                } else {
+                    "Stop Request"
+                });
+            }
         }
     }
 }

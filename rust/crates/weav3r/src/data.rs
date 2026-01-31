@@ -11,6 +11,8 @@ impl Weav3rSettingData {
     const KEY_PROFIT_PERCENT: &str = "profit_percent";
     const KEY_MIN_PROFIT: &str = "min_profit";
     const KEY_FILTER_IDS: &str = "filter_ids";
+    const KEY_AUDIO_SWITCH: &str = "audio_switch";
+    const DEFAULT_AUDIO_SWITCH: bool = true;
     const DEFAULT_INTERVAL: f64 = 5.0;
     const DEFAULT_PROFIT_PERCENT: f64 = 1.0;
     const DEFAULT_MIN_PROFIT: i64 = 10000;
@@ -75,6 +77,21 @@ impl Weav3rSettingData {
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_FILTER_IDS,
             filter_ids,
+        );
+    }
+
+    pub fn get_audio_switch(&self) -> bool {
+        self.cfg.read_config_bool(
+            Weav3rSettingData::SECTION,
+            Weav3rSettingData::KEY_AUDIO_SWITCH,
+            Weav3rSettingData::DEFAULT_AUDIO_SWITCH,
+        )
+    }
+    pub fn set_audio_switch(&mut self, audio_switch: bool) {
+        self.cfg.write_config_bool(
+            Weav3rSettingData::SECTION,
+            Weav3rSettingData::KEY_AUDIO_SWITCH,
+            audio_switch,
         );
     }
 
