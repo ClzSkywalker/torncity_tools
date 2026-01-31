@@ -32,10 +32,12 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
+scroll_deadzone = 10
 
 [node name="GridContainer" type="GridContainer" parent="LayoutContainer/VBoxContainer/ScrollContainer" unique_id=1170845750]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 1
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/h_separation = 4

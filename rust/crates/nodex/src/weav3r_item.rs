@@ -15,6 +15,8 @@ pub struct Weav3rItem {
     link_button: Option<Gd<LinkButton>>,
     profit_vbox: Option<Gd<VBoxContainer>>,
     top_bar: Option<Gd<PanelContainer>>,
+    stylebox: Option<Gd<StyleBoxFlat>>, // 缓存 stylebox
+    last_color_sec: u64,                // 缓存上次颜色对应的秒数
 }
 
 #[godot_api]
@@ -26,6 +28,22 @@ impl IPanelContainer for Weav3rItem {
         self.profit_vbox = self.get_node_as::<VBoxContainer>("%ProfitVBox");
         self.top_bar = self.get_node_as::<PanelContainer>("VBoxContainer/UserInfo");
         self.update_ui();
+    }
+
+    fn process(&mut self, _: f64) {
+        if self.stylebox.is_none() {
+            return;
+        }
+        let sec = tools::time::get_current_time() - self.item.created_on;
+        if sec > 30 {
+            self.rm_color();
+            return;
+        }
+        // 只有秒数变化时才更新颜色，避免每帧都更新
+        if sec != self.last_color_sec {
+            self.last_color_sec = sec;
+            self.set_color(sec);
+        }
     }
 }
 
@@ -53,26 +71,9 @@ impl Weav3rItem {
             link_button.set_text("Link");
         }
 
-        if let Some(top_bar) = self.top_bar.as_mut() {
-            let sec = tools::time::get_current_time() - self.item.created_on;
-            if sec <= 30 {
-                let mut stylebox = StyleBoxFlat::new_gd();
-                let max_sec = 40.0;
-                let t = (sec as f32 / max_sec).clamp(0.0, 1.0);
-                // sec 越大颜色越浅：从中等绿过渡到浅绿
-                let start_r = 80.0;
-                let start_g = 220.0;
-                let start_b = 80.0;
-                let end_r = 200.0;
-                let end_g = 255.0;
-                let end_b = 200.0;
-                let r = (start_r + (end_r - start_r) * t).round() as u8;
-                let g = (start_g + (end_g - start_g) * t).round() as u8;
-                let b = (start_b + (end_b - start_b) * t).round() as u8;
-                stylebox.set_bg_color(Color::from_rgba8(r, g, b, 255));
-                top_bar.add_theme_stylebox_override("panel", Some(&stylebox));
-            }
-        }
+        let sec = tools::time::get_current_time() - self.item.created_on;
+        self.last_color_sec = sec;
+        self.set_color(sec);
 
         let Some(vbox) = self.profit_vbox.as_mut() else {
             godot_error!("Weav3rItem: Failed to get profit_vbox");
@@ -98,6 +99,46 @@ impl Weav3rItem {
             };
             profit_panel.bind_mut().set_item(item.clone());
             vbox.add_child(Some(&profit_panel.upcast::<Node>()));
+        }
+    }
+
+    fn set_color(&mut self, sec: u64) {
+        if sec > 30 {
+            return;
+        }
+
+        // 懒初始化 stylebox，只创建一次
+        if self.stylebox.is_none() {
+            let stylebox = StyleBoxFlat::new_gd();
+            self.stylebox = Some(stylebox);
+            // 首次设置时绑定到 top_bar
+            if let (Some(top_bar), Some(stylebox)) = (self.top_bar.as_mut(), self.stylebox.as_ref())
+            {
+                top_bar.add_theme_stylebox_override("panel", Some(stylebox));
+            }
+        }
+
+        if let Some(stylebox) = self.stylebox.as_mut() {
+            let max_sec = 40.0;
+            let t = (sec as f32 / max_sec).clamp(0.0, 1.0);
+            // sec 越大颜色越浅：从中等绿过渡到浅绿
+            let start_r = 80.0;
+            let start_g = 220.0;
+            let start_b = 80.0;
+            let end_r = 200.0;
+            let end_g = 255.0;
+            let end_b = 200.0;
+            let r = (start_r + (end_r - start_r) * t).round() as u8;
+            let g = (start_g + (end_g - start_g) * t).round() as u8;
+            let b = (start_b + (end_b - start_b) * t).round() as u8;
+            stylebox.set_bg_color(Color::from_rgba8(r, g, b, 255));
+        }
+    }
+
+    fn rm_color(&mut self) {
+        if let Some(top_bar) = self.top_bar.as_mut() {
+            top_bar.remove_theme_stylebox_override("panel");
+            self.stylebox = None;
         }
     }
 }
