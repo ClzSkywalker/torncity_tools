@@ -12,7 +12,7 @@ RUST_MANIFEST="${RUST_MANIFEST:-rust/Cargo.toml}"
 RUST_CRATE="${RUST_CRATE:-bin}"
 GODOT_BIN="${GODOT_BIN:-godot}"
 GODOT_PROJECT_DIR="${GODOT_PROJECT_DIR:-godot}"
-EXPORT_NAME="${EXPORT_NAME:-godot_rust_demo}"
+EXPORT_NAME="${EXPORT_NAME:-TornTrade}"
 EXPORT_DIR="${EXPORT_DIR:-dist}"
 
 # 根据当前操作系统自动检测导出预设和扩展名

@@ -14,10 +14,11 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
-config/name="godot"
+config/name="Torn Trade"
+config/version="v0.0.1"
 run/main_scene="uid://oklyrp8n08cf"
 config/features=PackedStringArray("4.6", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://d0o8kbsdwa1x0"
 
 [display]
 
@@ -31,7 +32,7 @@ window/handheld/orientation=1
 
 [dotnet]
 
-project/assembly_name="godot"
+project/assembly_name="TornTrade"
 
 [editor_plugins]
 

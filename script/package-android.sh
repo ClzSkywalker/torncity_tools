@@ -16,7 +16,7 @@ RUST_MANIFEST="${RUST_MANIFEST:-rust/Cargo.toml}"
 RUST_CRATE="${RUST_CRATE:-bin}"
 GODOT_BIN="${GODOT_BIN:-godot}"
 GODOT_PROJECT_DIR="${GODOT_PROJECT_DIR:-godot}"
-EXPORT_NAME="${EXPORT_NAME:-godot_rust_demo}"
+EXPORT_NAME="${EXPORT_NAME:-TornTrade}"
 EXPORT_DIR="${EXPORT_DIR:-dist}"
 
 # Android 配置
