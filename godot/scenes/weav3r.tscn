@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://cqdj1oixx8i6"]
 
 [ext_resource type="AudioStream" uid="uid://eqjcw2pb3qdq" path="res://assets/audio/notification-18-270129.mp3" id="1_eu7jx"]
-[ext_resource type="Script" uid="uid://bwg5devwkrp03" path="res://scripts/timer_controller.gd" id="1_tcid7"]
 
 [node name="Weav3rScene" type="Weav3rScene" unique_id=1131974405]
 size_flags_horizontal = 3
@@ -39,12 +38,11 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/h_separation = 0
+theme_override_constants/h_separation = 4
 theme_override_constants/v_separation = 4
 
 [node name="TimerController" type="Button" parent="LayoutContainer/VBoxContainer" unique_id=115371824]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
-text = "Timer Controller"
-script = ExtResource("1_tcid7")
+text = "Stop Request"

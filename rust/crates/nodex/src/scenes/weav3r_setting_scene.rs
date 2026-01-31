@@ -1,5 +1,5 @@
 use godot::{
-    classes::{Button, Control, IControl, TextEdit},
+    classes::{Button, Control, IControl, SpinBox, TextEdit},
     prelude::*,
 };
 use tools::{
@@ -8,17 +8,15 @@ use tools::{
 };
 use weav3r::data::Weav3rSettingData;
 
-use crate::prelude::Weav3rMainScene;
-
 #[derive(GodotClass)]
 #[class(init,base=Control)]
 pub struct Weav3rSettingScene {
     #[base]
     base: Base<Control>,
     // @onready var 对应的字段
-    interval_edit: Option<Gd<TextEdit>>,
-    profit_percent_edit: Option<Gd<TextEdit>>,
-    min_profit_edit: Option<Gd<TextEdit>>,
+    interval_edit: Option<Gd<SpinBox>>,
+    profit_percent_edit: Option<Gd<SpinBox>>,
+    min_profit_edit: Option<Gd<SpinBox>>,
     filter_id_edit: Option<Gd<TextEdit>>,
     save_button: Option<Gd<Button>>,
 }
@@ -27,9 +25,9 @@ pub struct Weav3rSettingScene {
 impl IControl for Weav3rSettingScene {
     fn ready(&mut self) {
         // 在 ready 中初始化 @onready 变量，类似 GDScript 的 @onready var
-        self.interval_edit = self.get_node_as::<TextEdit>("%IntervalEdit");
-        self.profit_percent_edit = self.get_node_as::<TextEdit>("%ProfitPercentEdit");
-        self.min_profit_edit = self.get_node_as::<TextEdit>("%MinProfitEdit");
+        self.interval_edit = self.get_node_as::<SpinBox>("%IntervalEdit");
+        self.profit_percent_edit = self.get_node_as::<SpinBox>("%ProfitPercentEdit");
+        self.min_profit_edit = self.get_node_as::<SpinBox>("%MinProfitEdit");
         self.filter_id_edit = self.get_node_as::<TextEdit>("%FilterIdEdit");
         self.save_button = self.get_node_as::<Button>("%SaveButton");
 
@@ -50,19 +48,19 @@ impl IControl for Weav3rSettingScene {
         // 检查节点是否都找到了
         if let Some(interval_edit) = self.interval_edit.as_mut() {
             let interval = setting_data.get_interval();
-            interval_edit.set_text(format!("{:.2}", interval).as_str());
+            interval_edit.set_value(interval);
         } else {
             godot_error!("Weav3rSettingScene: IntervalEdit node not found.");
         }
         if let Some(profit_percent_edit) = self.profit_percent_edit.as_mut() {
             let profit_percent = setting_data.get_profit_percent();
-            profit_percent_edit.set_text(format!("{:.2}", profit_percent).as_str());
+            profit_percent_edit.set_value(profit_percent);
         } else {
             godot_error!("Weav3rSettingScene: ProfitPercentEdit node not found.");
         }
         if let Some(min_profit_edit) = self.min_profit_edit.as_mut() {
             let min_profit = setting_data.get_min_profit();
-            min_profit_edit.set_text(format!("{}", min_profit).as_str());
+            min_profit_edit.set_value(min_profit as f64);
         } else {
             godot_error!("Weav3rSettingScene: MinProfitEdit node not found.");
         }
@@ -108,15 +106,15 @@ impl Weav3rSettingScene {
         };
         let mut setting_data = Weav3rSettingData::new(cfg);
         if let Some(interval_edit) = &self.interval_edit {
-            let interval = interval_edit.get_text().to_float();
+            let interval = interval_edit.get_value();
             setting_data.set_interval(interval);
         }
         if let Some(profit_percent_edit) = &self.profit_percent_edit {
-            let profit_percent = profit_percent_edit.get_text().to_float();
+            let profit_percent = profit_percent_edit.get_value();
             setting_data.set_profit_percent(profit_percent);
         }
         if let Some(min_profit_edit) = &self.min_profit_edit {
-            let min_profit = min_profit_edit.get_text().to_int();
+            let min_profit = min_profit_edit.get_value().round() as i64;
             setting_data.set_min_profit(min_profit);
         }
         if let Some(filter_id_edit) = &self.filter_id_edit {
@@ -129,14 +127,6 @@ impl Weav3rSettingScene {
                 Weav3rSettingData::SETTINGS_PATH,
                 err
             );
-        }
-        let Some(mut tree) = self.base().get_tree() else {
-            godot_error!("Weav3rSettingScene: SceneTree not found.");
-            return;
-        };
-        let err = tree.change_scene_to_file(Weav3rMainScene::node_path());
-        if err != godot::global::Error::OK {
-            godot_error!("Weav3rSettingScene: Failed to change scene: {:?}", err);
         }
     }
 }

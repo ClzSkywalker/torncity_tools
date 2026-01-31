@@ -58,6 +58,13 @@ impl CfgTool {
         self.write_config(section, key, GString::from(value))
     }
 
+    pub fn read_config_bool(&self, section: &str, key: &str, default: bool) -> bool {
+        self.read_config(section, key, default)
+    }
+    pub fn write_config_bool(&mut self, section: &str, key: &str, value: bool) {
+        self.write_config(section, key, value)
+    }
+
     pub fn save(&mut self) -> Result<(), godot::global::Error> {
         let err = self.file.save(&self.config_path);
         if err == godot::global::Error::OK {
