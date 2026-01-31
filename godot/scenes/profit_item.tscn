@@ -1,45 +1,50 @@
 [gd_scene format=3 uid="uid://d3ngevu4ijcq6"]
 
-[node name="ProfitItem" type="ProfitItem"]
-custom_minimum_size = Vector2(430, 70)
+[node name="ProfitItem" type="ProfitItem" unique_id=1137593024]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="VBox" type="VBoxContainer" parent="."]
-layout_mode = 0
-size_flags_horizontal = 3
+[node name="VBox" type="VBoxContainer" parent="." unique_id=1044050483]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Label" type="Label" parent="VBox"]
+[node name="Label" type="Label" parent="VBox" unique_id=336054901]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 text = "Market:"
 
-[node name="HBox" type="HBoxContainer" parent="VBox"]
-custom_minimum_size = Vector2(430, 50)
+[node name="HBox" type="HBoxContainer" parent="VBox" unique_id=125076260]
 layout_mode = 2
 size_flags_vertical = 0
 
-[node name="ProfitSingleValue" type="Label" parent="VBox/HBox"]
-unique_name_in_owner = true
-clip_contents = true
-custom_minimum_size = Vector2(140, 0)
+[node name="VBoxContainer" type="VBoxContainer" parent="VBox/HBox" unique_id=1222079709]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="ProfitSingleValue" type="Label" parent="VBox/HBox/VBoxContainer" unique_id=483393979]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+size_flags_vertical = 1
 text = "SingleProfit:1200"
 
-[node name="ProfitTotalValue" type="Label" parent="VBox/HBox"]
+[node name="ProfitTotalValue" type="Label" parent="VBox/HBox/VBoxContainer" unique_id=1203514709]
 unique_name_in_owner = true
 clip_contents = true
-custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 1
 text = "TotalProfit: 120000"
 
-[node name="ProfitPercent" type="Label" parent="VBox/HBox"]
+[node name="ProfitPercent" type="Label" parent="VBox/HBox" unique_id=450310824]
 unique_name_in_owner = true
 clip_contents = true
-custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 10
 text = "Percent:4"

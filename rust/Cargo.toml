@@ -9,6 +9,7 @@ tools = { path = "crates/tools" }
 torn_logic = { path = "crates/torn_logic" }
 model = { path = "crates/model" }
 
+# 默认使用最新版本，Android 打包时脚本会自动切换到 0.4.2
 godot = "0.4.5"
 
 serde = { version = "1.0", features = ["derive"] }
