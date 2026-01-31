@@ -17,19 +17,23 @@ corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
 [node name="Weav3rItem" type="Weav3rItem" unique_id=1900466938]
+mouse_filter = 1
 size_flags_horizontal = 3
 size_flags_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_virtr")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1533889201]
 layout_mode = 2
+mouse_filter = 1
 
 [node name="UserInfo" type="PanelContainer" parent="VBoxContainer" unique_id=1380779751]
 layout_mode = 2
+mouse_filter = 1
 metadata/_edit_group_ = true
 
 [node name="UserInfoHBox" type="HBoxContainer" parent="VBoxContainer/UserInfo" unique_id=61351945]
 layout_mode = 2
+mouse_filter = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/UserInfo/UserInfoHBox" unique_id=1790768894]
 layout_mode = 2
@@ -71,5 +75,6 @@ structured_text_bidi_override = 1
 [node name="ProfitVBox" type="VBoxContainer" parent="VBoxContainer" unique_id=1107185474]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 1
 size_flags_vertical = 3
 theme_override_constants/separation = 4
