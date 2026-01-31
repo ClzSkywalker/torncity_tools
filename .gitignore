@@ -18,3 +18,7 @@ rust/target/
 *.log
 .cache/
 dist/
+
+# Android keystore (包含签名私钥，不应提交)
+*.keystore
+*.jks

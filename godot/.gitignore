@@ -4,3 +4,4 @@ addons/*
 *.uid
 *.tmp
 *.translation
+native/android/*

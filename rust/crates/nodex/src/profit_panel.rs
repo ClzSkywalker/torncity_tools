@@ -21,6 +21,7 @@ pub struct ProfitPanel {
     quantity_label: Option<Gd<Label>>,
     icon: Option<Gd<TextureRect>>,
     icon_request: Option<Gd<HttpRequest>>,
+    vbox_profit_list: Option<Gd<VBoxContainer>>,
 }
 
 #[godot_api]
@@ -30,12 +31,17 @@ impl IPanelContainer for ProfitPanel {
         self.quantity_label = self.get_node_as::<Label>("%Quantity");
         self.icon = self.get_node_as::<TextureRect>("%Icon");
         self.icon_request = self.get_node_as::<HttpRequest>("IconRequest");
+        self.vbox_profit_list = self.get_node_as::<VBoxContainer>("%VBoxProfitList");
+
+        // 设置 Name 和 Quantity 标签
+        if let Some(name_label) = self.name_label.as_mut() {
+            name_label.set_text(format!("Name:{}", self.item.name).as_str());
+        }
+        if let Some(quantity_label) = self.quantity_label.as_mut() {
+            quantity_label.set_text(format!("Quantity:{}", self.item.quantity).as_str());
+        }
 
         self.load_icon();
-
-        let mut vbox = self
-            .base()
-            .get_node_as::<VBoxContainer>("HBoxContainer/VBox");
 
         let Some(mut profit_item) = ProfitItem::get_scene_instance() else {
             godot_error!("ProfitPanel: Failed to instantiate profit_item_scene");
@@ -47,7 +53,9 @@ impl IPanelContainer for ProfitPanel {
             self.item.profit_total_value,
             self.item.profit_percentage,
         );
-        vbox.add_child(Some(&profit_item.upcast::<Node>()));
+        if let Some(vbox_profit_list) = self.vbox_profit_list.as_mut() {
+            vbox_profit_list.add_child(Some(&profit_item.upcast::<Node>()));
+        }
 
         let Some(mut profit_item) = ProfitItem::get_scene_instance() else {
             godot_error!("ProfitPanel: Failed to get profit_item_scene");
@@ -59,7 +67,9 @@ impl IPanelContainer for ProfitPanel {
             self.item.market_profit_total_value,
             self.item.market_profit_percentage,
         );
-        vbox.add_child(Some(&profit_item.upcast::<Node>()));
+        if let Some(vbox_profit_list) = self.vbox_profit_list.as_mut() {
+            vbox_profit_list.add_child(Some(&profit_item.upcast::<Node>()));
+        }
 
         let Some(mut profit_item) = ProfitItem::get_scene_instance() else {
             godot_error!("ProfitPanel: Failed to get profit_item_scene");
@@ -71,7 +81,9 @@ impl IPanelContainer for ProfitPanel {
             self.item.avg_bazaar_profit_total_value,
             self.item.avg_bazaar_profit_percentage,
         );
-        vbox.add_child(Some(&profit_item.upcast::<Node>()));
+        if let Some(vbox_profit_list) = self.vbox_profit_list.as_mut() {
+            vbox_profit_list.add_child(Some(&profit_item.upcast::<Node>()));
+        }
     }
 }
 

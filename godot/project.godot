@@ -15,15 +15,19 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="godot"
-run/main_scene="uid://lok4nkfbntua"
+run/main_scene="uid://oklyrp8n08cf"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
 [display]
 
-window/size/viewport_width=1440
-window/size/viewport_height=1024
+window/size/viewport_width=360
+window/size/viewport_height=640
+window/size/window_width_override=1280
+window/size/window_height_override=720
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
 
 [dotnet]
 
@@ -31,7 +35,7 @@ project/assembly_name="godot"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/rust_tools/plugin.cfg")
+enabled=PackedStringArray()
 
 [input]
 

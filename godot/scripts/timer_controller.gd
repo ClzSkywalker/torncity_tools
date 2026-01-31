@@ -6,7 +6,7 @@ func _ready() -> void:
 
 
 func _on_toggle_timer() -> void:
-	var timer := get_node_or_null("../Timer") as Timer
+	var timer := get_node_or_null("../../Timer") as Timer
 	if timer == null:
 		push_error("TimerController: Timer node not found.")
 		return

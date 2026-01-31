@@ -1,6 +1,6 @@
 [configuration]
 entry_symbol = "gdext_rust_init"
-compatibility_minimum = 4.5
+compatibility_minimum = 4.2
 reloadable = true
 
 [libraries]
@@ -12,3 +12,6 @@ macos.debug =            "res://../rust/target/debug/libbin.dylib"
 macos.release =          "res://../rust/target/release/libbin.dylib"
 macos.debug.arm64 =      "res://../rust/target/debug/libbin.dylib"
 macos.release.arm64 =    "res://../rust/target/release/libbin.dylib"
+; Android: 库会被注入到 APK 的 lib/arm64-v8a/ 目录
+android.debug.arm64 =    "libbin.so"
+android.release.arm64 =  "libbin.so"
