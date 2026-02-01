@@ -5,3 +5,5 @@ edition = "2024"
 
 [dependencies]
 model.workspace = true
+
+godot.workspace = true

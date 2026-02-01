@@ -1,0 +1,11 @@
+[package]
+name = "tools-cli"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+model.workspace = true
+
+calamine.workspace = true
+serde.workspace = true
+serde_json.workspace = true

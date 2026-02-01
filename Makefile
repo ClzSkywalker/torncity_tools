@@ -14,3 +14,6 @@ clippy:
 # 后台运行 godot 的 LSP 服务
 godot-lsp:
 	$(GODOT_BIN) --headless --path $(GODOT_PROJECT_DIR) --lsp-port 6005
+
+office-sell:
+	cargo run -p tools-cli --manifest-path $(RUST_MANIFEST)
