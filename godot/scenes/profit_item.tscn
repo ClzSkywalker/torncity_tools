@@ -30,14 +30,12 @@ theme_override_constants/separation = 0
 
 [node name="ProfitSingleValue" type="Label" parent="VBox/HBox/VBoxContainer" unique_id=483393979]
 unique_name_in_owner = true
-clip_contents = true
 layout_mode = 2
 size_flags_vertical = 1
 text = "SingleProfit:1200"
 
 [node name="ProfitTotalValue" type="Label" parent="VBox/HBox/VBoxContainer" unique_id=1203514709]
 unique_name_in_owner = true
-clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -45,7 +43,6 @@ text = "TotalProfit: 120000"
 
 [node name="ProfitPercent" type="Label" parent="VBox/HBox" unique_id=450310824]
 unique_name_in_owner = true
-clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 10
 text = "Percent:4"

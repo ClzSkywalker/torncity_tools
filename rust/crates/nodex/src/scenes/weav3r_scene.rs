@@ -133,8 +133,9 @@ impl Weav3rScene {
     ) {
         if response_code != 200 {
             godot_error!(
-                "Weav3rScene: Failed to get response.code: {}",
-                response_code
+                "Weav3rScene: Failed to get response.code: {}, body: {}",
+                response_code,
+                String::from_utf8_lossy(body.as_slice()).to_string()
             );
             return;
         }
