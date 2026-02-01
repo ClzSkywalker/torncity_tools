@@ -77,13 +77,24 @@ impl FavoritesRes {
             }
         }
 
+        user_profit_result.iter_mut().for_each(|item| {
+            item.items
+                .sort_by(|a, b| b.profit_total_value.cmp(&a.profit_total_value))
+        });
+
         // 计算单个用户总利润
         for res in user_profit_result.iter_mut() {
             res.total_value = res.items.iter().map(|x| x.total_value).sum::<u64>();
             res.profit_total_value = res
                 .items
                 .iter()
-                .map(|x| x.market_profit_total_value)
+                .map(|x| {
+                    if x.market_profit_total_value > x.avg_bazaar_profit_total_value {
+                        x.avg_bazaar_profit_total_value
+                    } else {
+                        x.market_profit_total_value
+                    }
+                })
                 .sum::<i64>();
             res.profit_percentage = if res.total_value == 0 {
                 0.0

@@ -98,3 +98,7 @@ A: 需要设置 `ANDROID_NDK_HOME` 环境变量指向 NDK 安装目录。
 **Q: APK 安装失败，提示 resources.arsc 对齐问题？**
 
 A: Android 11+ 要求 APK 必须经过 zipalign 对齐。确保 `ANDROID_HOME` 已设置，打包脚本会自动调用 zipalign。
+
+## magick ico 生成工具
+
+https://imagemagick.org/script/download.php

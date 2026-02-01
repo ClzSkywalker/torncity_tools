@@ -17,8 +17,8 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="Torn Trade"
 config/version="v0.0.1"
 run/main_scene="uid://oklyrp8n08cf"
+config/icon="res://assets/appicon/app.png"
 config/features=PackedStringArray("4.6", "Forward Plus")
-config/icon="uid://d0o8kbsdwa1x0"
 
 [display]
 
@@ -28,6 +28,7 @@ window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/stretch/scale=1
 window/handheld/orientation=1
 
 [dotnet]
