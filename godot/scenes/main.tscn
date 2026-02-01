@@ -40,6 +40,7 @@ theme_override_constants/separation = 4
 
 [node name="Home" type="Button" parent="VBoxContainer/BottomBar/HBoxContainer" unique_id=1635188981]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Home"

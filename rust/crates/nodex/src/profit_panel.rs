@@ -234,13 +234,13 @@ impl IControl for ProfitItem {
             .set_text(format!("Name:{}", self.label).as_str());
         self.base()
             .get_node_as::<Label>("%ProfitSingleValue")
-            .set_text(format!("Value:{}", self.single_value).as_str());
+            .set_text(format!("Single Profit:{}", self.single_value).as_str());
         self.base()
             .get_node_as::<Label>("%ProfitTotalValue")
-            .set_text(format!("Profit:{}", self.total_value).as_str());
+            .set_text(format!("Total Profit:{}", self.total_value).as_str());
         self.base()
             .get_node_as::<Label>("%ProfitPercent")
-            .set_text(format!("Percentage:{:.2}%", self.percentage).as_str());
+            .set_text(format!("Percent:{:.2}%", self.percentage).as_str());
     }
 }
 
