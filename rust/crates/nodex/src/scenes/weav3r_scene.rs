@@ -26,6 +26,9 @@ pub struct Weav3rScene {
 #[godot_api]
 impl IControl for Weav3rScene {
     fn ready(&mut self) {
+        self.favorites_res.filter.office_sell_list =
+            torn_logic::office_sell::get_office_sell_list().clone();
+
         self.http_request = self.get_node_as::<Weav3rHttpRequest>("HTTPRequest");
         self.timer = self.get_node_as::<Timer>("Timer");
         self.grid_container = self.get_node_as::<GridContainer>("%GridContainer");

@@ -1,4 +1,4 @@
-use model::weav3r::favorites::ProductionItem;
+use model::{office_sell::OfficeSellItem, weav3r::favorites::ProductionItem};
 
 #[derive(Debug, Clone, Default)]
 pub struct FavoritesRes {
@@ -35,6 +35,14 @@ impl FavoritesRes {
         for item in data.iter() {
             if filter.ignore_names.contains(&item.name) {
                 continue;
+            }
+
+            // 官方售卖价格过滤
+            if let Some(office_sell_item) = filter.office_sell_list.iter().find(|x| x.id == item.id)
+            {
+                if office_sell_item.sell > item.price as i64 {
+                    continue;
+                }
             }
 
             if let Some(filter_item) = filter
@@ -271,6 +279,8 @@ pub struct Filter {
     pub ignore_names: Vec<String>,
     /// 单个物品过滤条件
     pub filter_items: Vec<FilterItem>,
+    /// 官方售卖价格列表
+    pub office_sell_list: Vec<OfficeSellItem>,
 }
 
 /// 单个物品过滤条件

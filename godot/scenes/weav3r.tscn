@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cqdj1oixx8i6"]
 
-[ext_resource type="AudioStream" uid="uid://eqjcw2pb3qdq" path="res://assets/audio/notification-18-270129.mp3" id="1_eu7jx"]
+[ext_resource type="AudioStream" path="res://assets/audio/notification-18-270129.mp3" id="1_eu7jx"]
 
 [node name="Weav3rScene" type="Weav3rScene" unique_id=1131974405]
 size_flags_horizontal = 3

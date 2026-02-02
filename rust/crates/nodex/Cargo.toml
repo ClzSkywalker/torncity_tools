@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+torn_logic.workspace = true
 weav3r.workspace = true
 tools.workspace = true
 model.workspace = true
