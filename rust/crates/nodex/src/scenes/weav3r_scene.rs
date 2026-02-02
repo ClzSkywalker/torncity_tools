@@ -117,13 +117,20 @@ impl Weav3rScene {
             godot_error!("Weav3rScene: FilterIdEdit is empty.");
             return;
         }
-        let target_ids = filter_id_text.split(',').collect::<Vec<&str>>().join(",");
+        let target_ids = filter_id_text
+            .split(',')
+            .map(|x| x.trim())
+            .filter(|x| !x.is_empty() && x.parse::<i64>().is_ok())
+            .collect::<Vec<&str>>()
+            .join(",");
+        let next_action = setting_data.get_next_action();
 
         let Some(http) = self.http_request.as_mut() else {
             godot_error!("Weav3rScene: HTTPRequest node not found.");
             return;
         };
-        http.bind_mut().send_request(GString::from(&target_ids));
+        http.bind_mut()
+            .send_request(GString::from(&target_ids), next_action);
     }
 
     #[func]
@@ -172,14 +179,11 @@ impl Weav3rScene {
 
         self.favorites_res.set_new_profit(favorites_response.items);
 
-        if !self.favorites_res.has_new {
-            return;
-        }
-
-        godot_print!("Weav3rScene: Has new data.");
         if let Some(audio_player) = self.audio_player.as_mut()
+            && self.favorites_res.has_new
             && setting_data.get_audio_switch()
         {
+            godot_print!("Weav3rScene: Has new data.");
             audio_player.play();
         }
         self.render_list(self.favorites_res.user_profit_result.clone());

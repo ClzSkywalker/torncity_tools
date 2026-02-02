@@ -65,7 +65,7 @@ layout_mode = 2
 [node name="MinProfitLabel" type="Label" parent="TopBar/MinProfitVBox" unique_id=240777899]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Minimum profit"
+text = "Minimum profit:"
 
 [node name="MinProfitEdit" type="SpinBox" parent="TopBar/MinProfitVBox" unique_id=2072351256]
 unique_name_in_owner = true
@@ -75,6 +75,21 @@ max_value = 999999999.0
 step = 1000.0
 value = 100000.0
 rounded = true
+
+[node name="TokenVBox" type="HBoxContainer" parent="TopBar" unique_id=1971497604]
+layout_mode = 2
+
+[node name="TokenLabel" type="Label" parent="TopBar/TokenVBox" unique_id=1562374588]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Weav3r Token:"
+
+[node name="TokenEdit" type="TextEdit" parent="TopBar/TokenVBox" unique_id=295408602]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "404cb5d1e07e9049af7adcc4201bc257fc4af6aa67"
 
 [node name="FilterIdVBox" type="VBoxContainer" parent="TopBar" unique_id=341354117]
 layout_mode = 2

@@ -17,6 +17,7 @@ pub struct Weav3rSettingScene {
     interval_edit: Option<Gd<SpinBox>>,
     profit_percent_edit: Option<Gd<SpinBox>>,
     min_profit_edit: Option<Gd<SpinBox>>,
+    token_edit: Option<Gd<TextEdit>>,
     filter_id_edit: Option<Gd<TextEdit>>,
     save_button: Option<Gd<Button>>,
 }
@@ -28,6 +29,7 @@ impl IControl for Weav3rSettingScene {
         self.interval_edit = self.get_node_as::<SpinBox>("%IntervalEdit");
         self.profit_percent_edit = self.get_node_as::<SpinBox>("%ProfitPercentEdit");
         self.min_profit_edit = self.get_node_as::<SpinBox>("%MinProfitEdit");
+        self.token_edit = self.get_node_as::<TextEdit>("%TokenEdit");
         self.filter_id_edit = self.get_node_as::<TextEdit>("%FilterIdEdit");
         self.save_button = self.get_node_as::<Button>("%SaveButton");
 
@@ -63,6 +65,12 @@ impl IControl for Weav3rSettingScene {
             min_profit_edit.set_value(min_profit as f64);
         } else {
             godot_error!("Weav3rSettingScene: MinProfitEdit node not found.");
+        }
+        if let Some(token_edit) = self.token_edit.as_mut() {
+            let token = setting_data.get_next_action();
+            token_edit.set_text(token.as_str());
+        } else {
+            godot_error!("Weav3rSettingScene: TokenEdit node not found.");
         }
         if let Some(filter_id_edit) = self.filter_id_edit.as_mut() {
             let filter_id = setting_data.get_filter_ids();
@@ -116,6 +124,10 @@ impl Weav3rSettingScene {
         if let Some(min_profit_edit) = &self.min_profit_edit {
             let min_profit = min_profit_edit.get_value().round() as i64;
             setting_data.set_min_profit(min_profit);
+        }
+        if let Some(token_edit) = &self.token_edit {
+            let token = token_edit.get_text().strip_edges(true, true);
+            setting_data.set_next_action(&token.to_string());
         }
         if let Some(filter_id_edit) = &self.filter_id_edit {
             let filter_id = filter_id_edit.get_text().strip_edges(true, true);

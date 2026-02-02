@@ -17,6 +17,8 @@ impl Weav3rSettingData {
     const DEFAULT_PROFIT_PERCENT: f64 = 1.0;
     const DEFAULT_MIN_PROFIT: i64 = 10000;
     const DEFAULT_FILTER_IDS: &str = "385,183,97,902,901,904,129,184,260,903,263,617,272,264,271,267,277,282,276,186,187,215,261,618,273,258,266,268,269,281,274,384,533,555,532,554,530,553,987,986,985,206,586,587,151,556,529,528,36,527,310,35,210,39,37,209,38,541,552,542,638,551,531,550,818,283,370,364,1080,1079,1082,1083,1078,1081,367,366,1485,1486,1494,358";
+    const KEY_NEXT_ACTION: &str = "next_action";
+    const DEFAULT_NEXT_ACTION: &str = "404cb5d1e07e9049af7adcc4201bc257fc4af6aa67";
 }
 
 impl Weav3rSettingData {
@@ -92,6 +94,22 @@ impl Weav3rSettingData {
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_AUDIO_SWITCH,
             audio_switch,
+        );
+    }
+
+    pub fn get_next_action(&self) -> String {
+        self.cfg.read_config_string(
+            Weav3rSettingData::SECTION,
+            Weav3rSettingData::KEY_NEXT_ACTION,
+            Weav3rSettingData::DEFAULT_NEXT_ACTION,
+        )
+    }
+
+    pub fn set_next_action(&mut self, next_action: &str) {
+        self.cfg.write_config_string(
+            Weav3rSettingData::SECTION,
+            Weav3rSettingData::KEY_NEXT_ACTION,
+            next_action,
         );
     }
 

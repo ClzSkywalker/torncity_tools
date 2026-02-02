@@ -21,7 +21,7 @@ impl Weav3rHttpRequest {
     }
 
     #[func]
-    pub fn send_request(&mut self, target_ids: GString) {
+    pub fn send_request(&mut self, target_ids: GString, next_action: String) {
         if self.base().get_http_client_status() != godot::classes::http_client::Status::DISCONNECTED
         {
             godot_print!("Weav3rHttpRequest: Already requesting.");
@@ -35,7 +35,7 @@ impl Weav3rHttpRequest {
         http.add_header("Accept-Encoding", "gzip, deflate, br");
         http.add_header("Accept-Language", "zh-CN,zh;q=0.8");
         http.add_header("Content-Type", "text/plain;charset=UTF-8");
-        http.add_header("Next-Action", "404cb5d1e07e9049af7adcc4201bc257fc4af6aa67");
+        http.add_header("Next-Action", next_action.as_str());
         http.add_header("Cookie", "cf_clearance=LGkK7gXt4rzJAEpcbm00jNjfFMdYzjEsFo8M63HG49A-1768298710-1.2.1.1-Qquf0_4B_Ei7ZCmews9rVovka9v0ushpbQTDxbC2pNiriRj9k.PvUeUv9FclLRc6y2.zRBrPUpaLh3u6cftrKohRgHsbn3YJZUu2cFjh5r4uVf6ieqLgu1e4C3l0iJkLcq0fVc0BtqnaLsAqoPn2c68WBB0zo3tQdmlu9ldEcryDQaNkc5n7IIMcZoydCjNPMoobIfz2ESlDX132FsDkOWFnej73oSkEKOBe124hdDw");
         http.set_method(godot::classes::http_client::Method::POST);
         http.set_body(format!("[[{}]]", target_ids).as_bytes().to_vec());

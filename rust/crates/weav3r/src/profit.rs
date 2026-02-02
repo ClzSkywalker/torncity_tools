@@ -39,10 +39,9 @@ impl FavoritesRes {
 
             // 官方售卖价格过滤
             if let Some(office_sell_item) = filter.office_sell_list.iter().find(|x| x.id == item.id)
+                && office_sell_item.sell > item.price as i64
             {
-                if office_sell_item.sell > item.price as i64 {
-                    continue;
-                }
+                continue;
             }
 
             if let Some(filter_item) = filter

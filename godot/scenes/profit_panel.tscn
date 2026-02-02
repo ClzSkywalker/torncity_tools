@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b36gsqhuu7uko"]
 
-[ext_resource type="Texture2D" uid="uid://b2iqkm3xm1kws" path="res://assets/icons/loading.png" id="1_t4oqg"]
+[ext_resource type="Texture2D" uid="uid://1jftgo1q7dko" path="res://assets/icons/loading.png" id="1_t4oqg"]
 
 [node name="ProfitPanel" type="ProfitPanel" unique_id=1879942204]
 anchors_preset = 10
