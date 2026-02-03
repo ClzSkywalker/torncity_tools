@@ -276,7 +276,7 @@ fn process_normal_items(
     res
 }
 
-/// 处理武器（不可堆叠，需要合并计算）
+/// 处理武器（不可堆叠，同一用户的同一物品合并计算）
 fn process_weapon_items(
     product: ProductionItem,
     office_item_map: &HashMap<i32, ItemInfo>,

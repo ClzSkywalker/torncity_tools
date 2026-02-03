@@ -122,12 +122,13 @@ impl Weav3rScene {
             .split(',')
             .filter_map(|x| x.trim().parse::<i32>().ok())
             .collect::<Vec<i32>>();
+        self.favorites_res.filter.target_ids = f_target_ids.clone();
 
         let target_ids = torn_logic::item::get_item_list()
             .iter()
             .filter(|x| x.tradeable)
             .map(|x| x.id)
-            .chain(f_target_ids.clone())
+            .chain(f_target_ids)
             .map(|x| x.to_string())
             .collect::<Vec<String>>()
             .join(",");
@@ -138,7 +139,6 @@ impl Weav3rScene {
             godot_error!("Weav3rScene: HTTPRequest node not found.");
             return;
         };
-        self.favorites_res.filter.target_ids = f_target_ids;
         http.bind_mut()
             .send_request(GString::from(&target_ids), next_action);
     }

@@ -55,11 +55,12 @@ pub fn get_item_info_map() -> &'static HashMap<i32, ItemInfo> {
 }
 
 /// 获取武器物品 id map
+/// 武器是指 weapon_type 不为空的物品（排除 Temporary 类型）
 pub fn weapon_id_map() -> &'static HashMap<i32, ItemInfo> {
     WEAPON_ITEM_INFO_MAP.get_or_init(|| {
         get_item_list()
             .iter()
-            .filter(|item| item.weapon_type.is_empty() || item.weapon_type == "Temporary")
+            .filter(|item| !item.weapon_type.is_empty() && item.weapon_type != "Temporary")
             .map(|item| (item.id, item.clone()))
             .collect()
     })
