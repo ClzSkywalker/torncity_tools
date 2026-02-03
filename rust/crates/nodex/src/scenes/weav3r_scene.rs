@@ -3,7 +3,7 @@ use model::weav3r::favorites::FavoritesResponse;
 use tools::node::{INodeFunc, INodeTool};
 use weav3r::{
     data::Weav3rSettingData,
-    profit::{FavoritesRes, ProfitUserInfo},
+    profit::{FavoritesData, ProfitUserInfo},
 };
 
 use crate::prelude::{Weav3rHttpRequest, Weav3rItem};
@@ -18,7 +18,7 @@ pub struct Weav3rScene {
     grid_container: Option<Gd<GridContainer>>,
     audio_player: Option<Gd<AudioStreamPlayer>>,
     timer_controller: Option<Gd<Button>>,
-    favorites_res: FavoritesRes,
+    favorites_res: FavoritesData,
     /// 每个 item 的期望宽度（用于计算列数）
     #[init(val = 300.0)]
     item_width: f32,

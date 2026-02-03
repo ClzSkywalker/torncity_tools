@@ -2,7 +2,7 @@ use godot::{classes::*, prelude::*};
 use tools::node::{INodeFunc, INodeTool};
 use weav3r::profit::{ProfitUserInfo, get_bazaar_url};
 
-use crate::profit_panel::ProfitPanel;
+use crate::node::prelude::*;
 
 #[derive(GodotClass)]
 #[class(init,base=PanelContainer)]

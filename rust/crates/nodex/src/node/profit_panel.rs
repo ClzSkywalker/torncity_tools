@@ -5,10 +5,9 @@ use godot::{
 };
 use std::hash::{Hash, Hasher};
 use tools::node::{INodeFunc, INodeTool};
+use torn_logic::item::get_item_info_map;
 use weav3r::profit::ProfitInfo;
 
-const ICON_PATH: &str = "%Icon";
-const ICON_REQUEST_PATH: &str = "IconRequest";
 const ICON_CACHE_DIR: &str = "user://icon_cache";
 
 #[derive(GodotClass)]
@@ -99,23 +98,38 @@ impl ProfitPanel {
     }
 
     fn load_icon(&mut self) {
-        let url = self.item.image.trim();
+        let Some(url) = get_item_info_map()
+            .get(&self.item.id)
+            .map(|item| item.image.clone())
+        else {
+            godot_warn!("ProfitPanel: Icon url not found for item: {}", self.item.id);
+            return;
+        };
         if url.is_empty() {
+            godot_warn!("ProfitPanel: Icon url is empty for item: {}", self.item.id);
             return;
         }
-        if let Some(texture) = Self::load_texture_from_disk(url) {
-            let mut icon = self.base().get_node_as::<TextureRect>(ICON_PATH);
+        if let Some(texture) = Self::load_texture_from_disk(url.as_str()) {
+            let Some(icon) = self.icon.as_mut() else {
+                godot_error!("ProfitPanel: Icon node not found.");
+                return;
+            };
             icon.set_texture(Some(&texture));
             return;
         }
-        let mut request = self.base().get_node_as::<HttpRequest>(ICON_REQUEST_PATH);
+        let Some(request) = self.icon_request.as_mut() else {
+            godot_error!("ProfitPanel: Icon request node not found.");
+            return;
+        };
+        let mut request = request.clone();
         request
+            .clone()
             .signals()
             .request_completed()
             .connect_other(self, Self::on_icon_request_completed);
-        let err = request.request(url);
+        let err = request.request(url.as_str());
         if err != Error::OK {
-            godot_error!("ProfitPanel: Icon request failed: {:?}", err);
+            godot_error!("ProfitPanel: Icon request failed: {:?}, url: {}", err, url);
         }
     }
 
@@ -210,7 +224,10 @@ impl ProfitPanel {
                 let _ = file.store_buffer(&body);
             }
         }
-        let mut icon = self.base().get_node_as::<TextureRect>(ICON_PATH);
+        let Some(icon) = self.icon.as_mut() else {
+            godot_error!("ProfitPanel: Icon node not found.");
+            return;
+        };
         icon.set_texture(Some(&texture));
     }
 }
