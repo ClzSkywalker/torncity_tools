@@ -7,4 +7,6 @@ edition = "2024"
 model.workspace = true
 
 godot.workspace = true
+serde.workspace = true
 serde_json.workspace = true
+csv.workspace = true

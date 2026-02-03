@@ -14,11 +14,13 @@ impl Weav3rSettingData {
     const KEY_AUDIO_SWITCH: &str = "audio_switch";
     const DEFAULT_AUDIO_SWITCH: bool = true;
     const DEFAULT_INTERVAL: f64 = 5.0;
-    const DEFAULT_PROFIT_PERCENT: f64 = 1.0;
+    const DEFAULT_PROFIT_PERCENT: f32 = 1.0;
     const DEFAULT_MIN_PROFIT: i64 = 10000;
     const DEFAULT_FILTER_IDS: &str = "385,183,97,902,901,904,129,184,260,903,263,617,272,264,271,267,277,282,276,186,187,215,261,618,273,258,266,268,269,281,274,384,533,555,532,554,530,553,987,986,985,206,586,587,151,556,529,528,36,527,310,35,210,39,37,209,38,541,552,542,638,551,531,550,818,283,370,364,1080,1079,1082,1083,1078,1081,367,366,1485,1486,1494,358";
     const KEY_NEXT_ACTION: &str = "next_action";
     const DEFAULT_NEXT_ACTION: &str = "404cb5d1e07e9049af7adcc4201bc257fc4af6aa67";
+    const KEY_OFFICE_SELL_PRICE: &str = "office_sell_price";
+    const DEFAULT_OFFICE_SELL_PRICE: u64 = 5000;
 }
 
 impl Weav3rSettingData {
@@ -39,15 +41,15 @@ impl Weav3rSettingData {
             interval,
         );
     }
-    pub fn get_profit_percent(&self) -> f64 {
-        self.cfg.read_config_f64(
+    pub fn get_profit_percent(&self) -> f32 {
+        self.cfg.read_config_f32(
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_PROFIT_PERCENT,
             Weav3rSettingData::DEFAULT_PROFIT_PERCENT,
         )
     }
-    pub fn set_profit_percent(&mut self, profit_percent: f64) {
-        self.cfg.write_config_f64(
+    pub fn set_profit_percent(&mut self, profit_percent: f32) {
+        self.cfg.write_config_f32(
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_PROFIT_PERCENT,
             profit_percent,
@@ -110,6 +112,21 @@ impl Weav3rSettingData {
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_NEXT_ACTION,
             next_action,
+        );
+    }
+
+    pub fn get_office_sell_price(&self) -> u64 {
+        self.cfg.read_config_u64(
+            Weav3rSettingData::SECTION,
+            Weav3rSettingData::KEY_OFFICE_SELL_PRICE,
+            Weav3rSettingData::DEFAULT_OFFICE_SELL_PRICE,
+        )
+    }
+    pub fn set_office_sell_price(&mut self, office_sell_price: u64) {
+        self.cfg.write_config_u64(
+            Weav3rSettingData::SECTION,
+            Weav3rSettingData::KEY_OFFICE_SELL_PRICE,
+            office_sell_price,
         );
     }
 

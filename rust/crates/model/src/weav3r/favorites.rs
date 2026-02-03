@@ -32,8 +32,8 @@ pub struct ProductionItem {
     pub id: i32,
     pub name: String,
     pub image: String,
-    pub market_price: i32,
-    pub avg_bazaar_price: i32,
+    pub market_price: Option<i64>,
+    pub avg_bazaar_price: Option<i64>,
     pub cheapest_bazaars: Vec<BazaarPriceInfo>,
 }
 
@@ -43,7 +43,7 @@ pub struct BazaarPriceInfo {
     pub player_id: i32,
     pub player_name: String,
     pub quantity: i32,
-    pub price: i32,
+    pub price: i64,
     pub total_value: String,
 }
 
@@ -53,8 +53,8 @@ impl fmt::Display for FavoritesResponse {
         for item in &self.items {
             writeln!(f, "\n物品 ID: {}", item.id)?;
             writeln!(f, "  名称: {}", item.name)?;
-            writeln!(f, "  市场价: {}", item.market_price)?;
-            writeln!(f, "  平均集市价: {}", item.avg_bazaar_price)?;
+            writeln!(f, "  市场价: {:?}", item.market_price)?;
+            writeln!(f, "  平均集市价: {:?}", item.avg_bazaar_price)?;
             writeln!(f, "  最便宜的集市 (前5个):")?;
             for (idx, bazaar) in item.cheapest_bazaars.iter().take(5).enumerate() {
                 writeln!(

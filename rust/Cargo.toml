@@ -7,7 +7,6 @@ members = [
     "crates/tools",
     "crates/torn_logic",
     "crates/weav3r",
-    "tools/tools-cli",
 ]
 
 [workspace.dependencies]
@@ -17,8 +16,6 @@ tools = { path = "crates/tools" }
 torn_logic = { path = "crates/torn_logic" }
 model = { path = "crates/model" }
 
-tools-cli = { path = "tools/tools-cli" }
-
 # 默认使用最新版本，Android 打包时脚本会自动切换到 0.4.2
 godot = "0.4.5"
 
@@ -26,3 +23,4 @@ calamine = "0.32"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "2"
+csv = "1.4"

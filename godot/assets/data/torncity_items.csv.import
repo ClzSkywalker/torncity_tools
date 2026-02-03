@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://cxq0k5g7xkjes"
+
+[deps]
+
+files=["res://assets/data/torncity_items.name.translation", "res://assets/data/torncity_items.description.translation", "res://assets/data/torncity_items.effect.translation", "res://assets/data/torncity_items.requirement.translation", "res://assets/data/torncity_items.type.translation", "res://assets/data/torncity_items.weapon.translation", "res://assets/data/torncity_items.buy.translation", "res://assets/data/torncity_items.sell.translation", "res://assets/data/torncity_items.market.translation", "res://assets/data/torncity_items.circulation.translation", "res://assets/data/torncity_items.image.translation", "res://assets/data/torncity_items.tradeable.translation"]
+
+source_file="res://assets/data/torncity_items.csv"
+dest_files=["res://assets/data/torncity_items.name.translation", "res://assets/data/torncity_items.description.translation", "res://assets/data/torncity_items.effect.translation", "res://assets/data/torncity_items.requirement.translation", "res://assets/data/torncity_items.type.translation", "res://assets/data/torncity_items.weapon.translation", "res://assets/data/torncity_items.buy.translation", "res://assets/data/torncity_items.sell.translation", "res://assets/data/torncity_items.market.translation", "res://assets/data/torncity_items.circulation.translation", "res://assets/data/torncity_items.image.translation", "res://assets/data/torncity_items.tradeable.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

@@ -1,4 +1,6 @@
-use model::{office_sell::OfficeSellItem, weav3r::favorites::ProductionItem};
+use std::collections::HashMap;
+
+use model::{items::ItemInfo, weav3r::favorites::ProductionItem};
 
 #[derive(Debug, Clone, Default)]
 pub struct FavoritesRes {
@@ -15,7 +17,7 @@ impl FavoritesRes {
     pub fn set_new_profit(&mut self, productions: Vec<ProductionItem>) {
         let profit_items: Vec<ProfitInfo> = productions
             .iter()
-            .flat_map(|x| product_to_profit_info(x.clone()))
+            .flat_map(|x| self.product_to_profit_info(x.clone()))
             .collect();
         let profit_items = Self::filter(profit_items, self.filter.clone());
         let user_profit_result = Self::calc_user_profit(profit_items.clone());
@@ -29,6 +31,17 @@ impl FavoritesRes {
         self.has_new = has_new;
     }
 
+    fn product_to_profit_info(&self, product: ProductionItem) -> Vec<ProfitInfo> {
+        // 判断是否为武器
+        let is_weapon = self.filter.weapon_item_map.contains_key(&product.id);
+
+        if is_weapon {
+            process_weapon_items(product, &self.filter.weapon_item_map)
+        } else {
+            process_normal_items(product, &self.filter.office_item_map)
+        }
+    }
+
     /// 过滤利润信息
     pub fn filter(data: Vec<ProfitInfo>, filter: Filter) -> Vec<ProfitInfo> {
         let mut items = Vec::new();
@@ -38,17 +51,8 @@ impl FavoritesRes {
             }
 
             // 官方售卖价格过滤
-            if let Some(office_sell_item) = filter.office_sell_list.iter().find(|x| x.id == item.id)
-                && office_sell_item.sell > item.price as i64
-            {
-                continue;
-            }
-
-            if let Some(filter_item) = filter
-                .filter_items
-                .iter()
-                .find(|x| x.id == item.id || x.name == item.name)
-                && item.price > filter_item.price
+            if let Some(office_item) = filter.office_item_map.get(&item.id)
+                && (!office_item.tradeable || item.price > office_item.sell_price)
             {
                 continue;
             }
@@ -175,43 +179,51 @@ pub struct ProfitInfo {
     pub player_id: i32,
     pub player_name: String,
     pub quantity: i32,
-    pub price: i32,
+    pub price: u64,
     pub total_value: u64,
     pub image: String,
     pub market_profit_percentage: f32,
-    pub market_profit_single_value: i32,
+    pub market_profit_single_value: i64,
     pub market_profit_total_value: i64,
     pub avg_bazaar_profit_percentage: f32,
-    pub avg_bazaar_profit_single_value: i32,
+    pub avg_bazaar_profit_single_value: i64,
     pub avg_bazaar_profit_total_value: i64,
     // 按照最低的数据进行复制
     pub profit_percentage: f32,
-    pub profit_single_value: i32,
+    pub profit_single_value: i64,
     pub profit_total_value: i64,
 
     pub id: i32,
     pub name: String,
-    pub market_price: i32,
-    pub avg_bazaar_price: i32,
+    pub market_price: u64,
+    pub avg_bazaar_price: u64,
     pub created_on: u64, // 拉取到的时间戳
 }
 
-pub type ProfitInfoVec = Vec<ProfitInfo>;
-
-fn product_to_profit_info(product: ProductionItem) -> Vec<ProfitInfo> {
+/// 处理普通物品（可堆叠）
+fn process_normal_items(
+    product: ProductionItem,
+    _office_item_map: &HashMap<i32, ItemInfo>,
+) -> Vec<ProfitInfo> {
     let mut res = Vec::new();
-    for user_bazaar in product.cheapest_bazaars.iter() {
-        let market_profit_percentage = ((product.market_price - user_bazaar.price) as f32
-            / product.market_price as f32)
-            * 100.;
-        let market_profit_total_value =
-            ((product.market_price - user_bazaar.price) as i64) * user_bazaar.quantity as i64;
 
-        let avg_bazaar_percentage = (product.avg_bazaar_price - user_bazaar.price) as f32
-            / product.avg_bazaar_price as f32
-            * 100.;
+    for user_bazaar in product.cheapest_bazaars.iter() {
+        let Some(market_price) = product.market_price else {
+            continue;
+        };
+        let Some(avg_bazaar_price) = product.avg_bazaar_price else {
+            continue;
+        };
+
+        let market_profit_percentage =
+            ((market_price - user_bazaar.price) as f32 / market_price as f32) * 100.;
+        let market_profit_total_value =
+            (market_price - user_bazaar.price) * user_bazaar.quantity as i64;
+
+        let avg_bazaar_percentage =
+            (avg_bazaar_price - user_bazaar.price) as f32 / avg_bazaar_price as f32 * 100.;
         let avg_bazaar_total_value =
-            ((product.avg_bazaar_price - user_bazaar.price) as i64) * user_bazaar.quantity as i64;
+            (avg_bazaar_price - user_bazaar.price) * user_bazaar.quantity as i64;
 
         let profit_percent = if market_profit_percentage > avg_bazaar_percentage {
             avg_bazaar_percentage
@@ -219,9 +231,9 @@ fn product_to_profit_info(product: ProductionItem) -> Vec<ProfitInfo> {
             market_profit_percentage
         };
         let profit_single_value = if market_profit_percentage > avg_bazaar_percentage {
-            product.avg_bazaar_price - user_bazaar.price
+            avg_bazaar_price - user_bazaar.price
         } else {
-            product.market_price - user_bazaar.price
+            market_price - user_bazaar.price
         };
         let profit_total_value = if market_profit_total_value > avg_bazaar_total_value {
             avg_bazaar_total_value
@@ -240,14 +252,14 @@ fn product_to_profit_info(product: ProductionItem) -> Vec<ProfitInfo> {
             player_id: user_bazaar.player_id,
             player_name: user_bazaar.player_name.clone(),
             quantity: user_bazaar.quantity,
-            price: user_bazaar.price,
+            price: user_bazaar.price as u64,
             total_value,
             image: product.image.clone(),
             market_profit_percentage,
-            market_profit_single_value: product.market_price - user_bazaar.price,
+            market_profit_single_value: market_price - user_bazaar.price,
             market_profit_total_value,
             avg_bazaar_profit_percentage: avg_bazaar_percentage,
-            avg_bazaar_profit_single_value: product.avg_bazaar_price - user_bazaar.price,
+            avg_bazaar_profit_single_value: (avg_bazaar_price - user_bazaar.price),
             avg_bazaar_profit_total_value: avg_bazaar_total_value,
             profit_percentage: profit_percent,
             profit_single_value,
@@ -255,12 +267,136 @@ fn product_to_profit_info(product: ProductionItem) -> Vec<ProfitInfo> {
 
             id: product.id,
             name: product.name.clone(),
-            market_price: product.market_price,
-            avg_bazaar_price: product.avg_bazaar_price,
+            market_price: market_price as u64,
+            avg_bazaar_price: avg_bazaar_price as u64,
             ..Default::default()
         };
         res.push(profit_info);
     }
+    res
+}
+
+/// 处理武器（不可堆叠，需要合并计算）
+fn process_weapon_items(
+    product: ProductionItem,
+    office_item_map: &HashMap<i32, ItemInfo>,
+) -> Vec<ProfitInfo> {
+    let mut res = Vec::new();
+
+    // 获取官方回收价
+    let Some(office_item) = office_item_map.get(&product.id) else {
+        return res;
+    };
+
+    let Some(market_price) = product.market_price else {
+        return res;
+    };
+
+    let Some(avg_bazaar_price) = product.avg_bazaar_price else {
+        return res;
+    };
+
+    let office_sell_price = office_item.sell_price as i64;
+
+    // 按用户分组，并过滤掉超过官方回收价的武器
+    let mut user_groups: HashMap<i32, Vec<&model::weav3r::favorites::BazaarPriceInfo>> =
+        HashMap::new();
+
+    for user_bazaar in product.cheapest_bazaars.iter() {
+        // 过滤掉超过官方回收价的武器
+        if user_bazaar.price >= office_sell_price {
+            continue;
+        }
+
+        user_groups
+            .entry(user_bazaar.player_id)
+            .or_default()
+            .push(user_bazaar);
+    }
+
+    // 对每个用户的武器进行合并计算
+    for (player_id, bazaars) in user_groups {
+        if bazaars.is_empty() {
+            continue;
+        }
+
+        // 获取用户名
+        let player_name = bazaars[0].player_name.clone();
+
+        // 计算合并后的数量和总价值
+        let merged_quantity: i32 = bazaars.iter().map(|b| b.quantity).sum();
+
+        let merged_total_value: u64 = match bazaars
+            .iter()
+            .map(|b| b.total_value.parse::<u64>())
+            .collect::<Result<Vec<_>, _>>()
+        {
+            Ok(values) => values.into_iter().sum(),
+            Err(e) => {
+                eprintln!("Failed to parse total value for weapon: {}", e);
+                continue;
+            }
+        };
+
+        // 计算平均单价
+        let merged_avg_price = if merged_quantity > 0 {
+            (merged_total_value / merged_quantity as u64) as i64
+        } else {
+            continue;
+        };
+
+        // 计算利润
+        let market_profit_percentage =
+            ((market_price - merged_avg_price) as f32 / market_price as f32) * 100.;
+        let market_profit_total_value =
+            ((market_price - merged_avg_price) as i64) * merged_quantity as i64;
+
+        let avg_bazaar_percentage =
+            ((avg_bazaar_price - merged_avg_price) as f32 / avg_bazaar_price as f32) * 100.;
+        let avg_bazaar_total_value = (avg_bazaar_price - merged_avg_price) * merged_quantity as i64;
+
+        let profit_percent = if market_profit_percentage > avg_bazaar_percentage {
+            avg_bazaar_percentage
+        } else {
+            market_profit_percentage
+        };
+        let profit_single_value = if market_profit_percentage > avg_bazaar_percentage {
+            avg_bazaar_price - merged_avg_price
+        } else {
+            market_price - merged_avg_price
+        };
+        let profit_total_value = if market_profit_total_value > avg_bazaar_total_value {
+            avg_bazaar_total_value
+        } else {
+            market_profit_total_value
+        };
+
+        let profit_info = ProfitInfo {
+            player_id,
+            player_name,
+            quantity: merged_quantity,
+            price: merged_avg_price as u64,
+            total_value: merged_total_value,
+            image: product.image.clone(),
+            market_profit_percentage,
+            market_profit_single_value: market_price - merged_avg_price,
+            market_profit_total_value,
+            avg_bazaar_profit_percentage: avg_bazaar_percentage,
+            avg_bazaar_profit_single_value: avg_bazaar_price - merged_avg_price,
+            avg_bazaar_profit_total_value: avg_bazaar_total_value,
+            profit_percentage: profit_percent,
+            profit_single_value,
+            profit_total_value,
+
+            id: product.id,
+            name: product.name.clone(),
+            market_price: market_price as u64,
+            avg_bazaar_price: avg_bazaar_price as u64,
+            ..Default::default()
+        };
+        res.push(profit_info);
+    }
+
     res
 }
 
@@ -270,6 +406,8 @@ pub fn get_bazaar_url(player_id: i32) -> String {
 
 #[derive(Debug, Clone, Default)]
 pub struct Filter {
+    /// 用户自定义目标 id
+    pub target_ids: Vec<i32>,
     /// 最小利润
     pub min_profit: i64,
     /// 最小利润百分比
@@ -278,8 +416,12 @@ pub struct Filter {
     pub ignore_names: Vec<String>,
     /// 单个物品过滤条件
     pub filter_items: Vec<FilterItem>,
+    /// 官方最低售卖价格，低于这个价格的物品不走官方售卖逻辑
+    pub office_sell_price: u64,
     /// 官方售卖价格列表
-    pub office_sell_list: Vec<OfficeSellItem>,
+    pub office_item_map: HashMap<i32, ItemInfo>,
+    /// 武器物品 id map
+    pub weapon_item_map: HashMap<i32, ItemInfo>,
 }
 
 /// 单个物品过滤条件
@@ -287,7 +429,7 @@ pub struct Filter {
 pub struct FilterItem {
     pub id: i32,
     pub name: String,
-    pub price: i32,
+    pub price: u64,
     pub profit_percentage: f32,
 }
 

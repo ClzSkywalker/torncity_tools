@@ -56,7 +56,7 @@ impl IControl for Weav3rSettingScene {
         }
         if let Some(profit_percent_edit) = self.profit_percent_edit.as_mut() {
             let profit_percent = setting_data.get_profit_percent();
-            profit_percent_edit.set_value(profit_percent);
+            profit_percent_edit.set_value(profit_percent as f64);
         } else {
             godot_error!("Weav3rSettingScene: ProfitPercentEdit node not found.");
         }
@@ -118,7 +118,7 @@ impl Weav3rSettingScene {
             setting_data.set_interval(interval);
         }
         if let Some(profit_percent_edit) = &self.profit_percent_edit {
-            let profit_percent = profit_percent_edit.get_value();
+            let profit_percent = profit_percent_edit.get_value() as f32;
             setting_data.set_profit_percent(profit_percent);
         }
         if let Some(min_profit_edit) = &self.min_profit_edit {

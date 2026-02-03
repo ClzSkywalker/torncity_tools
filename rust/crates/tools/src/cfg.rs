@@ -21,6 +21,13 @@ impl CfgTool {
         })
     }
 
+    pub fn read_config_f32(&self, section: &str, key: &str, default: f32) -> f32 {
+        self.read_config(section, key, default)
+    }
+    pub fn write_config_f32(&mut self, section: &str, key: &str, value: f32) {
+        self.write_config(section, key, value)
+    }
+
     pub fn read_config_f64(&self, section: &str, key: &str, default: f64) -> f64 {
         self.read_config(section, key, default)
     }

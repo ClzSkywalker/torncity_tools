@@ -1,4 +1,5 @@
 use godot::{classes::*, prelude::*};
+use model::weav3r::favorites::FavoritesResponse;
 use tools::node::{INodeFunc, INodeTool};
 use weav3r::{
     data::Weav3rSettingData,
@@ -26,8 +27,7 @@ pub struct Weav3rScene {
 #[godot_api]
 impl IControl for Weav3rScene {
     fn ready(&mut self) {
-        self.favorites_res.filter.office_sell_list =
-            torn_logic::office_sell::get_office_sell_list().clone();
+        self.favorites_res.filter.office_item_map = torn_logic::item::get_item_info_map().clone();
 
         self.http_request = self.get_node_as::<Weav3rHttpRequest>("HTTPRequest");
         self.timer = self.get_node_as::<Timer>("Timer");
@@ -117,18 +117,28 @@ impl Weav3rScene {
             godot_error!("Weav3rScene: FilterIdEdit is empty.");
             return;
         }
-        let target_ids = filter_id_text
+
+        let f_target_ids = filter_id_text
             .split(',')
-            .map(|x| x.trim())
-            .filter(|x| !x.is_empty() && x.parse::<i64>().is_ok())
-            .collect::<Vec<&str>>()
+            .filter_map(|x| x.trim().parse::<i32>().ok())
+            .collect::<Vec<i32>>();
+
+        let target_ids = torn_logic::item::get_item_list()
+            .iter()
+            .filter(|x| x.tradeable)
+            .map(|x| x.id)
+            .chain(f_target_ids.clone())
+            .map(|x| x.to_string())
+            .collect::<Vec<String>>()
             .join(",");
+
         let next_action = setting_data.get_next_action();
 
         let Some(http) = self.http_request.as_mut() else {
             godot_error!("Weav3rScene: HTTPRequest node not found.");
             return;
         };
+        self.favorites_res.filter.target_ids = f_target_ids;
         http.bind_mut()
             .send_request(GString::from(&target_ids), next_action);
     }
@@ -163,22 +173,31 @@ impl Weav3rScene {
         };
 
         let setting_data = Weav3rSettingData::new(cfg);
-        let profit_percentage = setting_data.get_profit_percent();
-        let profit_minimum_value = setting_data.get_min_profit();
 
-        self.favorites_res.filter.min_profit = profit_minimum_value;
-        self.favorites_res.filter.min_profit_percentage = profit_percentage as f32;
+        self.favorites_res.filter.min_profit = setting_data.get_min_profit();
+        self.favorites_res.filter.min_profit_percentage = setting_data.get_profit_percent();
+        self.favorites_res.filter.office_sell_price = setting_data.get_office_sell_price();
 
         let response_text = String::from_utf8_lossy(body.as_slice());
-        let Ok(favorites_response) =
-            model::weav3r::favorites::FavoritesResponse::from_text(&response_text)
-        else {
-            godot_error!("Weav3rScene: Failed to parse favorites response.");
-            return;
+        let favorites_response = match FavoritesResponse::from_text(&response_text) {
+            Ok(r) => r,
+            Err(err) => {
+                godot_error!(
+                    "Weav3rScene: Failed to parse favorites response. Error: {:?}",
+                    err,
+                );
+                godot_error!(
+                    "Weav3rScene: Original response text (first 500 chars): {}",
+                    if response_text.len() > 500 {
+                        format!("{}...", &response_text[..500])
+                    } else {
+                        response_text.to_string()
+                    }
+                );
+                return;
+            }
         };
-
         self.favorites_res.set_new_profit(favorites_response.items);
-
         if let Some(audio_player) = self.audio_player.as_mut()
             && self.favorites_res.has_new
             && setting_data.get_audio_switch()
