@@ -297,10 +297,16 @@ fn process_normal_items(
     let Some(market_price) = product.market_price else {
         return res;
     };
+    if market_price == 0 {
+        return res;
+    }
 
     let Some(avg_bazaar_price) = product.avg_bazaar_price else {
         return res;
     };
+    if avg_bazaar_price == 0 {
+        return res;
+    }
 
     let in_target_ids = target_ids.contains(&product.id);
 

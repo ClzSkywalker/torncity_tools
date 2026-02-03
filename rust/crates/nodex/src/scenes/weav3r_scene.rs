@@ -160,6 +160,10 @@ impl Weav3rScene {
             return;
         }
 
+        if let Some(ref mut http) = self.http_request {
+            http.bind_mut().on_request_completed();
+        }
+
         let cfg = match tools::cfg::CfgTool::new(Weav3rSettingData::SETTINGS_PATH) {
             Ok(r) => r,
             Err(err) => {
@@ -209,7 +213,8 @@ impl Weav3rScene {
     }
 
     fn render_list(&mut self, items: Vec<ProfitUserInfo>) {
-        let Some(grid_container) = self.grid_container.as_mut() else {
+        let grid_container = self.grid_container.clone();
+        let Some(mut grid_container) = grid_container else {
             godot_error!("Weav3rScene: GridContainer node not found.");
             return;
         };
@@ -227,7 +232,7 @@ impl Weav3rScene {
             };
             weav3r_item.bind_mut().set_item(item);
             let child = weav3r_item.upcast::<Node>();
-            grid_container.add_child(Some(&child));
+            grid_container.call_deferred("add_child", &[child.to_variant()]);
         }
     }
 

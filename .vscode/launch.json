@@ -14,7 +14,7 @@
                 "-w" // windowed mode
                 // "-e": editor does not keep breakpoints; thus not listed here.
             ],
-            "program": "/Applications/Godot_mono.app"
+            "program": "/Applications/Godot.app"
         }
     ]
 }
