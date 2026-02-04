@@ -48,9 +48,9 @@ impl IPanelContainer for ProfitPanel {
         };
         profit_item.bind_mut().set_value(
             "Final Profit".to_string(),
-            self.item.profit_single_value,
-            self.item.profit_total_value,
-            self.item.profit_percentage,
+            self.item.final_profit.single_value,
+            self.item.final_profit.total_value,
+            self.item.final_profit.percentage,
         );
         if let Some(vbox_profit_list) = self.vbox_profit_list.as_mut() {
             vbox_profit_list.add_child(Some(&profit_item.upcast::<Node>()));
@@ -62,9 +62,9 @@ impl IPanelContainer for ProfitPanel {
         };
         profit_item.bind_mut().set_value(
             "Market Profit".to_string(),
-            self.item.market_profit_single_value,
-            self.item.market_profit_total_value,
-            self.item.market_profit_percentage,
+            self.item.market_profit.single_value,
+            self.item.market_profit.total_value,
+            self.item.market_profit.percentage,
         );
         if let Some(vbox_profit_list) = self.vbox_profit_list.as_mut() {
             vbox_profit_list.add_child(Some(&profit_item.upcast::<Node>()));
@@ -76,9 +76,9 @@ impl IPanelContainer for ProfitPanel {
         };
         profit_item.bind_mut().set_value(
             "Avg Bazaar Profit".to_string(),
-            self.item.avg_bazaar_profit_single_value,
-            self.item.avg_bazaar_profit_total_value,
-            self.item.avg_bazaar_profit_percentage,
+            self.item.avg_bazaar_profit.single_value,
+            self.item.avg_bazaar_profit.total_value,
+            self.item.avg_bazaar_profit.percentage,
         );
         if let Some(vbox_profit_list) = self.vbox_profit_list.as_mut() {
             vbox_profit_list.add_child(Some(&profit_item.upcast::<Node>()));

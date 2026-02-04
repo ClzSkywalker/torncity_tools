@@ -1,6 +1,9 @@
 use godot::{classes::*, prelude::*};
 use model::weav3r::favorites::FavoritesResponse;
-use tools::node::{INodeFunc, INodeTool};
+use tools::{
+    base::eq_f64,
+    node::{INodeFunc, INodeTool},
+};
 use weav3r::{
     data::Weav3rSettingData,
     profit::{FavoritesData, ProfitUserInfo},
@@ -62,6 +65,8 @@ impl IControl for Weav3rScene {
         if let Some(timer) = self.timer.as_mut() {
             let mut timer = timer.clone();
             timer.set_wait_time(interval);
+            timer.set_process_mode(godot::classes::node::ProcessMode::ALWAYS);
+            timer.start();
             timer
                 .signals()
                 .timeout()
@@ -151,6 +156,30 @@ impl Weav3rScene {
         _headers: PackedStringArray,
         body: PackedByteArray,
     ) {
+        let cfg = match tools::cfg::CfgTool::new(Weav3rSettingData::SETTINGS_PATH) {
+            Ok(r) => r,
+            Err(err) => {
+                godot_error!(
+                    "Weav3rScene: Failed to load {:?}: {:?}",
+                    Weav3rSettingData::SETTINGS_PATH,
+                    err
+                );
+                return;
+            }
+        };
+        let setting_data = Weav3rSettingData::new(cfg);
+        let interval = setting_data.get_interval();
+        if let Some(timer) = &self.timer {
+            let interval2 = timer.get_wait_time();
+            if !eq_f64(interval, interval2)
+                && let Some(timer) = self.timer.as_mut()
+            {
+                let mut timer = timer.clone();
+                timer.set_wait_time(interval);
+                timer.start();
+            }
+        }
+
         if response_code != 200 {
             godot_error!(
                 "Weav3rScene: Failed to get response.code: {}, body: {}",
@@ -262,6 +291,22 @@ impl Weav3rScene {
                     "Stop Request"
                 });
             }
+        }
+    }
+
+    #[func]
+    fn pause_timer(&mut self) {
+        if let Some(timer) = self.timer.as_mut() {
+            timer.set_paused(true);
+            godot_print!("Weav3rScene: Timer paused");
+        }
+    }
+
+    #[func]
+    fn resume_timer(&mut self) {
+        if let Some(timer) = self.timer.as_mut() {
+            timer.set_paused(false);
+            godot_print!("Weav3rScene: Timer resumed");
         }
     }
 }
