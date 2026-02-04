@@ -44,6 +44,7 @@ impl Weav3rHttpRequest {
         http.add_header("Cookie", "cf_clearance=LGkK7gXt4rzJAEpcbm00jNjfFMdYzjEsFo8M63HG49A-1768298710-1.2.1.1-Qquf0_4B_Ei7ZCmews9rVovka9v0ushpbQTDxbC2pNiriRj9k.PvUeUv9FclLRc6y2.zRBrPUpaLh3u6cftrKohRgHsbn3YJZUu2cFjh5r4uVf6ieqLgu1e4C3l0iJkLcq0fVc0BtqnaLsAqoPn2c68WBB0zo3tQdmlu9ldEcryDQaNkc5n7IIMcZoydCjNPMoobIfz2ESlDX132FsDkOWFnej73oSkEKOBe124hdDw");
         http.set_method(godot::classes::http_client::Method::POST);
         http.set_body(format!("[[{}]]", target_ids).as_bytes().to_vec());
+        godot_print!("Weav3rHttpRequest: Sending request with body: {}", target_ids);
         let request_result = http.send_request(&mut self.base_mut());
         if let Err(err) = request_result {
             godot_error!("Weav3rHttpRequest failed: {:?}", err);

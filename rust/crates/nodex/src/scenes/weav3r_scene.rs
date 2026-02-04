@@ -123,6 +123,8 @@ impl Weav3rScene {
             return;
         }
 
+        let office_sell_price = setting_data.get_office_sell_price();
+
         let f_target_ids = filter_id_text
             .split(',')
             .filter_map(|x| x.trim().parse::<i32>().ok())
@@ -131,7 +133,7 @@ impl Weav3rScene {
 
         let target_ids = torn_logic::item::get_item_list()
             .iter()
-            .filter(|x| x.tradeable)
+            .filter(|x| x.tradeable && x.sell_price >= office_sell_price)
             .map(|x| x.id)
             .chain(f_target_ids)
             .map(|x| x.to_string())
@@ -210,7 +212,7 @@ impl Weav3rScene {
         self.favorites_res.filter.min_profit = setting_data.get_min_profit();
         self.favorites_res.filter.min_profit_percentage = setting_data.get_profit_percent();
         self.favorites_res.filter.office_sell_price = setting_data.get_office_sell_price();
-
+        self.favorites_res.filter.office_sell_profit = setting_data.get_office_sell_profit();
         let response_text = String::from_utf8_lossy(body.as_slice());
         let favorites_response = match FavoritesResponse::from_text(&response_text) {
             Ok(r) => r,

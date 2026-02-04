@@ -1,14 +1,8 @@
-use godot::{
-    classes::{file_access::ModeFlags, *},
-    global::Error,
-    prelude::*,
-};
-use std::hash::{Hash, Hasher};
+use godot::{classes::*, prelude::*};
 use tools::node::{INodeFunc, INodeTool};
-use torn_logic::item::get_item_info_map;
 use weav3r::profit::ProfitInfo;
 
-const ICON_CACHE_DIR: &str = "user://icon_cache";
+use crate::node::http::image::ImageHttpRequest;
 
 #[derive(GodotClass)]
 #[class(init,base=PanelContainer)]
@@ -18,8 +12,7 @@ pub struct ProfitPanel {
     base: Base<PanelContainer>,
     name_label: Option<Gd<Label>>,
     quantity_label: Option<Gd<Label>>,
-    icon: Option<Gd<TextureRect>>,
-    icon_request: Option<Gd<HttpRequest>>,
+    image_request: Option<Gd<ImageHttpRequest>>,
     vbox_profit_list: Option<Gd<VBoxContainer>>,
 }
 
@@ -28,8 +21,7 @@ impl IPanelContainer for ProfitPanel {
     fn ready(&mut self) {
         self.name_label = self.get_node_as::<Label>("%Name");
         self.quantity_label = self.get_node_as::<Label>("%Quantity");
-        self.icon = self.get_node_as::<TextureRect>("%Icon");
-        self.icon_request = self.get_node_as::<HttpRequest>("IconRequest");
+        self.image_request = self.get_node_as::<ImageHttpRequest>("%ImageHttpRequest");
         self.vbox_profit_list = self.get_node_as::<VBoxContainer>("%VBoxProfitList");
 
         // 设置 Name 和 Quantity 标签
@@ -39,8 +31,11 @@ impl IPanelContainer for ProfitPanel {
         if let Some(quantity_label) = self.quantity_label.as_mut() {
             quantity_label.set_text(format!("Quantity:{}", self.item.quantity).as_str());
         }
-
-        self.load_icon();
+        if let Some(image_request) = self.image_request.as_mut() {
+            image_request
+                .bind_mut()
+                .set_url_request(GString::from(self.item.image.as_str()));
+        }
 
         let Some(mut profit_item) = ProfitItem::get_scene_instance() else {
             godot_error!("ProfitPanel: Failed to instantiate profit_item_scene");
@@ -95,140 +90,6 @@ impl INodeFunc for ProfitPanel {
 impl ProfitPanel {
     pub fn set_item(&mut self, item: ProfitInfo) {
         self.item = item;
-    }
-
-    fn load_icon(&mut self) {
-        let Some(url) = get_item_info_map()
-            .get(&self.item.id)
-            .map(|item| item.image.clone())
-        else {
-            godot_warn!("ProfitPanel: Icon url not found for item: {}", self.item.id);
-            return;
-        };
-        if url.is_empty() {
-            godot_warn!("ProfitPanel: Icon url is empty for item: {}", self.item.id);
-            return;
-        }
-        if let Some(texture) = Self::load_texture_from_disk(url.as_str()) {
-            let Some(icon) = self.icon.as_mut() else {
-                godot_error!("ProfitPanel: Icon node not found.");
-                return;
-            };
-            icon.set_texture(Some(&texture));
-            return;
-        }
-        let Some(request) = self.icon_request.as_mut() else {
-            godot_error!("ProfitPanel: Icon request node not found.");
-            return;
-        };
-        let mut request = request.clone();
-        request
-            .clone()
-            .signals()
-            .request_completed()
-            .connect_other(self, Self::on_icon_request_completed);
-        let err = request.request(url.as_str());
-        if err != Error::OK {
-            godot_error!("ProfitPanel: Icon request failed: {:?}, url: {}", err, url);
-        }
-    }
-
-    fn load_image_from_buffer(&self, body: &PackedByteArray) -> Option<Gd<Image>> {
-        let ext = Self::get_url_extension(self.item.image.as_str());
-        Self::decode_image_from_buffer(body, ext.as_str())
-    }
-
-    fn decode_image_from_buffer(body: &PackedByteArray, ext: &str) -> Option<Gd<Image>> {
-        let mut image = Image::new_gd();
-        let err = match ext {
-            "png" => image.load_png_from_buffer(body),
-            "jpg" | "jpeg" => image.load_jpg_from_buffer(body),
-            "webp" => image.load_webp_from_buffer(body),
-            "svg" => image.load_svg_from_buffer(body),
-            _ => image.load_png_from_buffer(body),
-        };
-        if err != Error::OK {
-            godot_error!("ProfitPanel: Failed to decode icon: {:?}", err);
-            return None;
-        }
-        Some(image)
-    }
-
-    fn load_texture_from_disk(url: &str) -> Option<Gd<ImageTexture>> {
-        let path = Self::get_cache_path(url);
-        let bytes = FileAccess::get_file_as_bytes(path.as_str());
-        if bytes.is_empty() {
-            return None;
-        }
-        let ext = Self::get_url_extension(path.as_str());
-        let image = Self::decode_image_from_buffer(&bytes, ext.as_str())?;
-        ImageTexture::create_from_image(&image)
-    }
-
-    fn ensure_cache_dir() {
-        if let Some(mut dir) = DirAccess::open("user://") {
-            let _ = dir.make_dir("icon_cache");
-        } else {
-            let _ = DirAccess::make_dir_absolute(ICON_CACHE_DIR);
-        }
-    }
-
-    fn get_cache_path(url: &str) -> String {
-        let hash = Self::hash_url(url);
-        let ext = Self::get_url_extension(url);
-        format!("{}/{}.{}", ICON_CACHE_DIR, hash, ext)
-    }
-
-    fn get_url_extension(url: &str) -> String {
-        let lower = url.to_lowercase();
-        let no_query = lower.split('?').next().unwrap_or("");
-        match no_query.rsplit('.').next() {
-            Some(ext @ ("png" | "jpg" | "jpeg" | "webp" | "svg")) => ext.to_string(),
-            _ => "png".to_string(),
-        }
-    }
-
-    fn hash_url(url: &str) -> u64 {
-        let mut hasher = std::collections::hash_map::DefaultHasher::new();
-        url.hash(&mut hasher);
-        hasher.finish()
-    }
-}
-
-#[godot_api]
-impl ProfitPanel {
-    #[func]
-    fn on_icon_request_completed(
-        &mut self,
-        _result: i64,
-        response_code: i64,
-        _headers: PackedStringArray,
-        body: PackedByteArray,
-    ) {
-        if response_code != 200 {
-            godot_error!("ProfitPanel: Icon request failed. code: {}", response_code);
-            return;
-        }
-        let Some(image) = self.load_image_from_buffer(&body) else {
-            return;
-        };
-        let Some(texture) = ImageTexture::create_from_image(&image) else {
-            godot_error!("ProfitPanel: Failed to create texture from image.");
-            return;
-        };
-        let url = self.item.image.trim();
-        if !url.is_empty() {
-            Self::ensure_cache_dir();
-            let path = Self::get_cache_path(url);
-            if let Some(mut file) = FileAccess::open(path.as_str(), ModeFlags::WRITE) {
-                let _ = file.store_buffer(&body);
-            }
-        }
-        let Some(icon) = self.icon.as_mut() else {
-            godot_error!("ProfitPanel: Icon node not found.");
-            return;
-        };
-        icon.set_texture(Some(&texture));
     }
 }
 

@@ -1,3 +1,15 @@
 {
-    "godotTools.editorPath.godot4": "/Applications/Godot_mono.app"
+    "godotTools.editorPath.godot4": "/Applications/Godot_mono.app",
+    "rust-analyzer.cargo.features": "all",
+    "rust-analyzer.completion.autoimport.enable": true,
+    "rust-analyzer.completion.postfix.enable": true,
+    "rust-analyzer.completion.privateEditable.enable": true,
+    "rust-analyzer.inlayHints.typeHints.enable": true,
+    "rust-analyzer.inlayHints.parameterHints.enable": true,
+    "rust-analyzer.lens.enable": true,
+    "rust-analyzer.lens.run.enable": true,
+    "rust-analyzer.checkOnSave": true,
+    "files.watcherExclude": {
+        "**/target/**": true
+    }
 }

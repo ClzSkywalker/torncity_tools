@@ -19,6 +19,8 @@ pub struct Weav3rSettingScene {
     min_profit_edit: Option<Gd<SpinBox>>,
     token_edit: Option<Gd<TextEdit>>,
     filter_id_edit: Option<Gd<TextEdit>>,
+    office_sell_price_edit: Option<Gd<SpinBox>>,
+    office_sell_profit_edit: Option<Gd<SpinBox>>,
     save_button: Option<Gd<Button>>,
 }
 
@@ -31,6 +33,9 @@ impl IControl for Weav3rSettingScene {
         self.min_profit_edit = self.get_node_as::<SpinBox>("%MinProfitEdit");
         self.token_edit = self.get_node_as::<TextEdit>("%TokenEdit");
         self.filter_id_edit = self.get_node_as::<TextEdit>("%FilterIdEdit");
+        self.office_sell_price_edit = self.get_node_as::<SpinBox>("%OfficeSellPriceEdit");
+        self.office_sell_profit_edit = self.get_node_as::<SpinBox>("%OfficeSellProfitEdit");
+
         self.save_button = self.get_node_as::<Button>("%SaveButton");
 
         let cfg = match CfgTool::new(Weav3rSettingData::SETTINGS_PATH) {
@@ -78,6 +83,24 @@ impl IControl for Weav3rSettingScene {
         } else {
             godot_error!("Weav3rSettingScene: FilterIdEdit node not found.");
         }
+        if let Some(edit) = self.office_sell_price_edit.as_mut() {
+            let value = setting_data.get_office_sell_price();
+            edit.set_value(value as f64);
+        } else {
+            godot_error!("Weav3rSettingScene: office_sell_price_edit node not found.");
+        }
+        if let Some(edit) = self.office_sell_profit_edit.as_mut() {
+            let value = setting_data.get_office_sell_price();
+            edit.set_value(value as f64);
+        } else {
+            godot_error!("Weav3rSettingScene: office_sell_profit_edit node not found.");
+        }
+        if let Some(edit) = self.office_sell_profit_edit.as_mut() {
+            let value = setting_data.get_office_sell_price();
+            edit.set_value(value as f64);
+        } else {
+            godot_error!("Weav3rSettingScene: office_sell_profit_edit node not found.");
+        }
 
         if let Some(save_button) = &self.save_button {
             let save_button = save_button.clone();
@@ -100,7 +123,7 @@ impl INodeFunc for Weav3rSettingScene {
 #[godot_api]
 impl Weav3rSettingScene {
     #[func]
-    fn on_save_pressed(&mut self) {
+    pub fn on_save_pressed(&mut self) {
         let cfg = match CfgTool::new(Weav3rSettingData::SETTINGS_PATH) {
             Ok(r) => r,
             Err(err) => {
@@ -133,6 +156,15 @@ impl Weav3rSettingScene {
             let filter_id = filter_id_edit.get_text().strip_edges(true, true);
             setting_data.set_filter_ids(&filter_id.to_string());
         }
+        if let Some(office_sell_price_edit) = &self.office_sell_price_edit {
+            let office_sell_price = office_sell_price_edit.get_value() as u64;
+            setting_data.set_office_sell_price(office_sell_price);
+        }
+        if let Some(office_sell_profit_edit) = &self.office_sell_profit_edit {
+            let office_sell_profit = office_sell_profit_edit.get_value() as u64;
+            setting_data.set_office_sell_profit(office_sell_profit);
+        }
+
         if let Err(err) = setting_data.save() {
             godot_error!(
                 "Weav3rSettingScene: Failed to save {:?}: {:?}",

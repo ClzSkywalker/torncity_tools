@@ -33,7 +33,7 @@ mac: debug
 cfg: 
 Windows: %APPDATA%\Godot\app_userdata\[project_name]\settings.cfg
 实际路径通常是：C:\Users\[用户名]\AppData\Roaming\Godot\app_userdata\[项目名]\settings.cfg
-macOS: ~/Library/ApplicationSupport/Godot/app_userdata/[project_name]/settings.cfg
+macOS: ~/Library/Application\ Support/Godot/app_userdata/Torn\ Trade/settings.cfg
 实际路径：/Users/[用户名]/Library/Application Support/Godot/app_userdata/[项目名]/settings.
 Linux: ~/.local/share/godot/app_userdata/[project_name]/settings.cfg
 实际路径：/home/[用户名]/.local/share/godot/app_userdata/[项目名]/settings.cfg

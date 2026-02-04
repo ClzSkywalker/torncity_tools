@@ -83,12 +83,6 @@ impl FavoritesData {
                 continue;
             };
 
-            let final_profit = if selected.market.percentage <= selected.bazaar.percentage {
-                selected.market.clone()
-            } else {
-                selected.bazaar.clone()
-            };
-
             let profit_info = ProfitInfo {
                 player_id: user_bazaar.player_id,
                 player_name: user_bazaar.player_name.clone(),
@@ -98,7 +92,7 @@ impl FavoritesData {
                 image: product.image.clone(),
                 market_profit: selected.market,
                 avg_bazaar_profit: selected.bazaar,
-                final_profit,
+                final_profit: selected.final_profit,
                 id: product.id,
                 name: product.name.clone(),
                 market_price: market_price as u64,
@@ -140,10 +134,16 @@ impl FavoritesData {
             let in_target = filter.target_ids.contains(&item.id);
 
             // 官方售卖价格过滤
-            if !in_target
-                && let Some(office_item) = filter.office_item_map.get(&item.id)
-                && (!office_item.tradeable || item.price > office_item.sell_price)
-            {
+            if !in_target {
+                if let Some(office_item) = filter.office_item_map.get(&item.id)
+                    && (!office_item.tradeable
+                        || item.price > office_item.sell_price
+                        || office_item.sell_price < filter.office_sell_price
+                        || item.final_profit.total_value < filter.office_sell_profit as i64)
+                {
+                    continue;
+                }
+                items.push(item.clone());
                 continue;
             }
 
@@ -260,6 +260,7 @@ pub struct ProfitInfo {
     pub player_id: i32,
     pub player_name: String,
     pub quantity: i32,
+    // 物品售卖价格
     pub price: u64,
     pub total_value: u64,
     pub image: String,
@@ -304,6 +305,8 @@ impl ProfitInfo {
         res.avg_bazaar_profit.total_value *= total_quantity as i64;
         res.final_profit.total_value *= total_quantity as i64;
         res.quantity = total_quantity;
+        res.price = (res.price * self.quantity as u64 + data.price * data.quantity as u64)
+            / (self.quantity as u64 + data.quantity as u64);
         res
     }
 }
@@ -337,7 +340,7 @@ impl ProfitMetrics {
 /// 选中的利润计算结果
 #[derive(Debug, Clone)]
 struct SelectedProfit {
-    _profit: ProfitMetrics,
+    final_profit: ProfitMetrics,
     market: ProfitMetrics,
     bazaar: ProfitMetrics,
     used_office: bool,
@@ -374,7 +377,7 @@ fn compute_profit(
         let pick_market = market.percentage <= bazaar.percentage;
         let chosen = if pick_market { &market } else { &bazaar };
         Some(SelectedProfit {
-            _profit: ProfitMetrics {
+            final_profit: ProfitMetrics {
                 percentage: chosen.percentage,
                 single_value: chosen.single_value,
                 total_value: chosen.total_value,
@@ -392,7 +395,7 @@ fn compute_profit(
             0.0
         };
         Some(SelectedProfit {
-            _profit: ProfitMetrics {
+            final_profit: ProfitMetrics {
                 percentage: pct,
                 single_value: diff,
                 total_value: diff * q,
@@ -422,10 +425,10 @@ pub struct Filter {
     pub filter_items: Vec<FilterItem>,
     /// 官方最低售卖价格，低于这个价格的物品不走官方售卖逻辑
     pub office_sell_price: u64,
+    /// 官方售卖利润阀值，低于这个利润的物品不走官方售卖逻辑
+    pub office_sell_profit: u64,
     /// 官方售卖价格列表
     pub office_item_map: HashMap<i32, ItemInfo>,
-    /// 武器物品 id map
-    pub weapon_item_map: HashMap<i32, ItemInfo>,
 }
 
 /// 单个物品过滤条件

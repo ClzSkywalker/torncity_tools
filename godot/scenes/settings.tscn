@@ -76,6 +76,40 @@ step = 1000.0
 value = 100000.0
 rounded = true
 
+[node name="OfficeCellPriceVBox" type="HBoxContainer" parent="TopBar" unique_id=2021125571]
+layout_mode = 2
+
+[node name="MinProfitLabel" type="Label" parent="TopBar/OfficeCellPriceVBox" unique_id=1678627140]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Office Price Start:"
+
+[node name="OfficeSellPriceEdit" type="SpinBox" parent="TopBar/OfficeCellPriceVBox" unique_id=477757865]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 999999999.0
+step = 100.0
+value = 1000.0
+rounded = true
+
+[node name="OfficeCellProfitVBox" type="HBoxContainer" parent="TopBar" unique_id=240063190]
+layout_mode = 2
+
+[node name="MinProfitLabel" type="Label" parent="TopBar/OfficeCellProfitVBox" unique_id=908185390]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Office Profit:"
+
+[node name="OfficeSellProfitEdit" type="SpinBox" parent="TopBar/OfficeCellProfitVBox" unique_id=1010943956]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 999999999.0
+step = 100.0
+value = 10000.0
+rounded = true
+
 [node name="TokenVBox" type="HBoxContainer" parent="TopBar" unique_id=1971497604]
 layout_mode = 2
 

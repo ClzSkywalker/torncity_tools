@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b36gsqhuu7uko"]
 
-[ext_resource type="Texture2D" uid="uid://1jftgo1q7dko" path="res://assets/icons/loading.png" id="1_t4oqg"]
+[ext_resource type="PackedScene" uid="uid://hvcoiyibi46e" path="res://node/icon_http_request.tscn" id="1_k110n"]
 
 [node name="ProfitPanel" type="ProfitPanel" unique_id=1879942204]
 anchors_preset = 10
@@ -10,8 +10,6 @@ grow_horizontal = 2
 size_flags_horizontal = 3
 mouse_filter = 1
 
-[node name="IconRequest" type="HTTPRequest" parent="." unique_id=603792153]
-
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1416990647]
 layout_mode = 2
 
@@ -20,14 +18,10 @@ custom_minimum_size = Vector2(350, 0)
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Icon" type="TextureRect" parent="VBoxContainer/HBoxContainer" unique_id=693380979]
+[node name="ImageHttpRequest" parent="VBoxContainer/HBoxContainer" unique_id=456074364 instance=ExtResource("1_k110n")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(50, 50)
 layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-texture = ExtResource("1_t4oqg")
-expand_mode = 3
+size_flags_vertical = 4
 
 [node name="VBox" type="VBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=1145129035]
 layout_mode = 2
