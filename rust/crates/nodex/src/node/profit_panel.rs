@@ -1,6 +1,6 @@
 use godot::{classes::*, prelude::*};
 use tools::node::{INodeFunc, INodeTool};
-use weav3r::profit::ProfitInfo;
+use weav3r::profit::{ProfitInfo, ProfitMetrics};
 
 use crate::node::http::image::ImageHttpRequest;
 
@@ -42,39 +42,11 @@ impl IPanelContainer for ProfitPanel {
             return;
         };
         profit_item.bind_mut().set_value(
-            "Final Profit".to_string(),
-            self.item.final_profit.single_value,
-            self.item.final_profit.total_value,
-            self.item.final_profit.percentage,
+            self.item.final_profit.clone(),
+            self.item.price as u64 * self.item.quantity as u64,
+            self.item.final_sell_price * self.item.quantity as u64,
         );
-        if let Some(vbox_profit_list) = self.vbox_profit_list.as_mut() {
-            vbox_profit_list.add_child(Some(&profit_item.upcast::<Node>()));
-        }
-
-        let Some(mut profit_item) = ProfitItem::get_scene_instance() else {
-            godot_error!("ProfitPanel: Failed to get profit_item_scene");
-            return;
-        };
-        profit_item.bind_mut().set_value(
-            "Market Profit".to_string(),
-            self.item.market_profit.single_value,
-            self.item.market_profit.total_value,
-            self.item.market_profit.percentage,
-        );
-        if let Some(vbox_profit_list) = self.vbox_profit_list.as_mut() {
-            vbox_profit_list.add_child(Some(&profit_item.upcast::<Node>()));
-        }
-
-        let Some(mut profit_item) = ProfitItem::get_scene_instance() else {
-            godot_error!("ProfitPanel: Failed to get profit_item_scene");
-            return;
-        };
-        profit_item.bind_mut().set_value(
-            "Avg Bazaar Profit".to_string(),
-            self.item.avg_bazaar_profit.single_value,
-            self.item.avg_bazaar_profit.total_value,
-            self.item.avg_bazaar_profit.percentage,
-        );
+        // todo 这个 list 可以考虑干掉
         if let Some(vbox_profit_list) = self.vbox_profit_list.as_mut() {
             vbox_profit_list.add_child(Some(&profit_item.upcast::<Node>()));
         }
@@ -96,29 +68,50 @@ impl ProfitPanel {
 #[derive(GodotClass)]
 #[class(init,base=Control)]
 pub struct ProfitItem {
-    pub label: String,
-    pub single_value: i64,
-    pub total_value: i64,
-    pub percentage: f32,
     #[base]
     base: Base<Control>,
+    profit_single_label: Option<Gd<Label>>,
+    profit_total_label: Option<Gd<Label>>,
+    profit_percent_label: Option<Gd<Label>>,
+    total_price_buy_label: Option<Gd<Label>>,
+    total_price_sell_label: Option<Gd<Label>>,
+    /// 利润
+    pub profit: ProfitMetrics,
+    /// 购买总价值
+    pub total_price_buy: u64,
+    /// 出售的总价值
+    pub total_price_sell: u64,
 }
 
 #[godot_api]
 impl IControl for ProfitItem {
     fn ready(&mut self) {
-        self.base()
-            .get_node_as::<Label>("%Label")
-            .set_text(format!("Name:{}", self.label).as_str());
-        self.base()
-            .get_node_as::<Label>("%ProfitSingleValue")
-            .set_text(format!("Single Profit:{}", self.single_value).as_str());
-        self.base()
-            .get_node_as::<Label>("%ProfitTotalValue")
-            .set_text(format!("Total Profit:{}", self.total_value).as_str());
-        self.base()
-            .get_node_as::<Label>("%ProfitPercent")
-            .set_text(format!("Percent:{:.2}%", self.percentage).as_str());
+        self.profit_single_label = self.get_node_as::<Label>("%ProfitSingleValue");
+        self.profit_total_label = self.get_node_as::<Label>("%ProfitTotalValue");
+        self.profit_percent_label = self.get_node_as::<Label>("%ProfitPercent");
+        self.total_price_buy_label = self.get_node_as::<Label>("%TotalPriceBuy");
+        self.total_price_sell_label = self.get_node_as::<Label>("%TotalPriceSell");
+
+        if let Some(profit_single_label) = self.profit_single_label.as_mut() {
+            profit_single_label
+                .set_text(format!("Single Profit:{}", self.profit.single_value).as_str());
+        }
+        if let Some(profit_total_label) = self.profit_total_label.as_mut() {
+            profit_total_label
+                .set_text(format!("Total Profit:{}", self.profit.total_value).as_str());
+        }
+        if let Some(profit_percent_label) = self.profit_percent_label.as_mut() {
+            profit_percent_label
+                .set_text(format!("Percent:{:.2}%", self.profit.percentage).as_str());
+        }
+        if let Some(total_price_buy_label) = self.total_price_buy_label.as_mut() {
+            total_price_buy_label
+                .set_text(format!("Total Price Buy:{}", self.total_price_buy).as_str());
+        }
+        if let Some(total_price_sell_label) = self.total_price_sell_label.as_mut() {
+            total_price_sell_label
+                .set_text(format!("Total Price Sell:{}", self.total_price_sell).as_str());
+        }
     }
 }
 
@@ -131,14 +124,12 @@ impl INodeFunc for ProfitItem {
 impl ProfitItem {
     pub fn set_value(
         &mut self,
-        label: String,
-        single_value: i64,
-        total_value: i64,
-        percentage: f32,
+        profit: ProfitMetrics,
+        total_price_buy: u64,
+        total_price_sell: u64,
     ) {
-        self.label = label;
-        self.single_value = single_value;
-        self.total_value = total_value;
-        self.percentage = percentage;
+        self.profit = profit;
+        self.total_price_buy = total_price_buy;
+        self.total_price_sell = total_price_sell;
     }
 }

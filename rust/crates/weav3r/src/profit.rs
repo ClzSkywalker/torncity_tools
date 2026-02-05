@@ -72,7 +72,7 @@ impl FavoritesData {
 
             let user_price = user_bazaar.price;
 
-            let Some(selected) = compute_profit(
+            let Some((selected, final_price)) = compute_profit(
                 in_target_ids,
                 user_price,
                 user_bazaar.quantity,
@@ -97,6 +97,7 @@ impl FavoritesData {
                 name: product.name.clone(),
                 market_price: market_price as u64,
                 avg_bazaar_price: avg_bazaar_price as u64,
+                final_sell_price: final_price,
                 is_office: selected.used_office,
                 ..Default::default()
             };
@@ -260,7 +261,7 @@ pub struct ProfitInfo {
     pub player_id: i32,
     pub player_name: String,
     pub quantity: i32,
-    // 物品售卖价格
+    // 用户售卖价格
     pub price: u64,
     pub total_value: u64,
     pub image: String,
@@ -273,6 +274,8 @@ pub struct ProfitInfo {
     pub name: String,
     pub market_price: u64,
     pub avg_bazaar_price: u64,
+    /// 最终二次售价,回收后卖出的价格
+    pub final_sell_price: u64,
     pub created_on: u64, // 拉取到的时间戳
 
     /// 是否在官方售卖
@@ -298,12 +301,15 @@ impl ProfitInfo {
         let total_quantity = self.quantity + data.quantity;
         let e = data.single_value();
         let mut res = self.clone();
+
         res.market_profit = res.market_profit.combine(e.market_profit);
         res.avg_bazaar_profit = res.avg_bazaar_profit.combine(e.avg_bazaar_profit);
         res.final_profit = res.final_profit.combine(e.final_profit);
+
         res.market_profit.total_value *= total_quantity as i64;
         res.avg_bazaar_profit.total_value *= total_quantity as i64;
         res.final_profit.total_value *= total_quantity as i64;
+
         res.quantity = total_quantity;
         res.price = (res.price * self.quantity as u64 + data.price * data.quantity as u64)
             / (self.quantity as u64 + data.quantity as u64);
@@ -315,7 +321,9 @@ impl ProfitInfo {
 #[derive(Debug, Clone, Default)]
 pub struct ProfitMetrics {
     pub percentage: f32,
+    /// 单个利润
     pub single_value: i64,
+    /// 总利润
     pub total_value: i64,
 }
 
@@ -356,7 +364,7 @@ fn compute_profit(
     market_price: i64,
     avg_bazaar_price: i64,
     office_sell_price: Option<i64>,
-) -> Option<SelectedProfit> {
+) -> Option<(SelectedProfit, u64)> {
     let q = quantity as i64;
 
     let market_diff = market_price - user_price;
@@ -375,17 +383,24 @@ fn compute_profit(
 
     if in_target_ids {
         let pick_market = market.percentage <= bazaar.percentage;
-        let chosen = if pick_market { &market } else { &bazaar };
-        Some(SelectedProfit {
-            final_profit: ProfitMetrics {
-                percentage: chosen.percentage,
-                single_value: chosen.single_value,
-                total_value: chosen.total_value,
+        let (chosen, final_price) = if pick_market {
+            (&market, market_price)
+        } else {
+            (&bazaar, avg_bazaar_price)
+        };
+        Some((
+            SelectedProfit {
+                final_profit: ProfitMetrics {
+                    percentage: chosen.percentage,
+                    single_value: chosen.single_value,
+                    total_value: chosen.total_value,
+                },
+                market,
+                bazaar,
+                used_office: false,
             },
-            market,
-            bazaar,
-            used_office: false,
-        })
+            final_price as u64,
+        ))
     } else {
         let ref_price = office_sell_price?;
         let diff = ref_price - user_price;
@@ -394,16 +409,19 @@ fn compute_profit(
         } else {
             0.0
         };
-        Some(SelectedProfit {
-            final_profit: ProfitMetrics {
-                percentage: pct,
-                single_value: diff,
-                total_value: diff * q,
+        Some((
+            SelectedProfit {
+                final_profit: ProfitMetrics {
+                    percentage: pct,
+                    single_value: diff,
+                    total_value: diff * q,
+                },
+                market,
+                bazaar,
+                used_office: true,
             },
-            market,
-            bazaar,
-            used_office: true,
-        })
+            ref_price as u64,
+        ))
     }
 }
 
