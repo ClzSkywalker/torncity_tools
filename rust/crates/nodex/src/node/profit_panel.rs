@@ -43,8 +43,8 @@ impl IPanelContainer for ProfitPanel {
         };
         profit_item.bind_mut().set_value(
             self.item.final_profit.clone(),
-            self.item.price as u64 * self.item.quantity as u64,
-            self.item.final_sell_price * self.item.quantity as u64,
+            self.item.total_recyle_price(),
+            self.item.final_profit.total_sell_price,
         );
         // todo 这个 list 可以考虑干掉
         if let Some(vbox_profit_list) = self.vbox_profit_list.as_mut() {
@@ -78,9 +78,9 @@ pub struct ProfitItem {
     /// 利润
     pub profit: ProfitMetrics,
     /// 购买总价值
-    pub total_price_buy: u64,
+    pub total_recyle_price: u64,
     /// 出售的总价值
-    pub total_price_sell: u64,
+    pub total_sell_price: u64,
 }
 
 #[godot_api]
@@ -94,23 +94,21 @@ impl IControl for ProfitItem {
 
         if let Some(profit_single_label) = self.profit_single_label.as_mut() {
             profit_single_label
-                .set_text(format!("Single Profit:{}", self.profit.single_value).as_str());
+                .set_text(format!("Single Profit:{}", self.profit.single_profit_value).as_str());
         }
         if let Some(profit_total_label) = self.profit_total_label.as_mut() {
             profit_total_label
-                .set_text(format!("Total Profit:{}", self.profit.total_value).as_str());
+                .set_text(format!("Total Profit:{}", self.profit.total_profit_value).as_str());
         }
         if let Some(profit_percent_label) = self.profit_percent_label.as_mut() {
             profit_percent_label
                 .set_text(format!("Percent:{:.2}%", self.profit.percentage).as_str());
         }
         if let Some(total_price_buy_label) = self.total_price_buy_label.as_mut() {
-            total_price_buy_label
-                .set_text(format!("Total Price Buy:{}", self.total_price_buy).as_str());
+            total_price_buy_label.set_text(format!("Buy:{}", self.total_recyle_price).as_str());
         }
         if let Some(total_price_sell_label) = self.total_price_sell_label.as_mut() {
-            total_price_sell_label
-                .set_text(format!("Total Price Sell:{}", self.total_price_sell).as_str());
+            total_price_sell_label.set_text(format!("Sell:{}", self.total_sell_price).as_str());
         }
     }
 }
@@ -125,11 +123,11 @@ impl ProfitItem {
     pub fn set_value(
         &mut self,
         profit: ProfitMetrics,
-        total_price_buy: u64,
-        total_price_sell: u64,
+        total_recyle_price: u64,
+        total_sell_price: u64,
     ) {
         self.profit = profit;
-        self.total_price_buy = total_price_buy;
-        self.total_price_sell = total_price_sell;
+        self.total_recyle_price = total_recyle_price;
+        self.total_sell_price = total_sell_price;
     }
 }

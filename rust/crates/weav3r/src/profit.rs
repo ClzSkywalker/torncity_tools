@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use godot::global::godot_error;
 use model::{items::ItemInfo, weav3r::favorites::ProductionItem};
+use tools::order_change::{ContentHashable, ContentHash, hash::StableHasher};
 
 #[derive(Debug, Clone, Default)]
 pub struct FavoritesData {
@@ -62,24 +63,17 @@ impl FavoritesData {
         };
 
         for user_bazaar in product.cheapest_bazaars.iter() {
-            let Ok(total_value) = user_bazaar.total_value.parse::<u64>() else {
-                eprintln!(
-                    "Failed to parse total value: \'{}\'",
-                    user_bazaar.total_value
-                );
-                continue;
-            };
-
             let user_price = user_bazaar.price;
 
-            let Some((selected, final_price)) = compute_profit(
+            let selected = compute_profit(
                 in_target_ids,
-                user_price,
+                user_price as u64,
                 user_bazaar.quantity,
                 market_price,
                 avg_bazaar_price,
                 office_sell_price,
-            ) else {
+            );
+            let Some(final_profit) = selected.final_profit else {
                 continue;
             };
 
@@ -87,18 +81,14 @@ impl FavoritesData {
                 player_id: user_bazaar.player_id,
                 player_name: user_bazaar.player_name.clone(),
                 quantity: user_bazaar.quantity,
-                price: user_bazaar.price as u64,
-                total_value,
+                single_recyle_price: user_bazaar.price as u64,
                 image: product.image.clone(),
                 market_profit: selected.market,
                 avg_bazaar_profit: selected.bazaar,
-                final_profit: selected.final_profit,
+                office_profit: selected.office,
+                final_profit,
                 id: product.id,
                 name: product.name.clone(),
-                market_price: market_price as u64,
-                avg_bazaar_price: avg_bazaar_price as u64,
-                final_sell_price: final_price,
-                is_office: selected.used_office,
                 ..Default::default()
             };
             res.push(profit_info);
@@ -138,9 +128,9 @@ impl FavoritesData {
             if !in_target {
                 if let Some(office_item) = filter.office_item_map.get(&item.id)
                     && (!office_item.tradeable
-                        || item.price > office_item.sell_price
+                        || item.single_recyle_price > office_item.sell_price
                         || office_item.sell_price < filter.office_sell_price
-                        || item.final_profit.total_value < filter.office_sell_profit as i64)
+                        || item.final_profit.total_profit_value < filter.office_sell_profit as i64)
                 {
                     continue;
                 }
@@ -149,7 +139,7 @@ impl FavoritesData {
             }
 
             if item.final_profit.percentage >= filter.min_profit_percentage
-                && item.final_profit.total_value >= filter.min_profit
+                && item.final_profit.total_profit_value >= filter.min_profit
             {
                 items.push(item.clone());
             }
@@ -180,22 +170,29 @@ impl FavoritesData {
         }
 
         user_profit_result.iter_mut().for_each(|item| {
-            item.items
-                .sort_by(|a, b| b.final_profit.total_value.cmp(&a.final_profit.total_value))
+            item.items.sort_by(|a, b| {
+                b.final_profit
+                    .total_profit_value
+                    .cmp(&a.final_profit.total_profit_value)
+            })
         });
 
         // 计算单个用户总利润
         for res in user_profit_result.iter_mut() {
-            res.total_value = res.items.iter().map(|x| x.total_value).sum::<u64>();
-            res.profit_total_value = res
+            res.total_recyle_price = res
                 .items
                 .iter()
-                .map(|x| x.final_profit.total_value)
+                .map(|x| x.total_recyle_price())
+                .sum::<u64>();
+            res.total_profit_price = res
+                .items
+                .iter()
+                .map(|x| x.final_profit.total_profit_value)
                 .sum::<i64>();
-            res.profit_percentage = if res.total_value == 0 {
+            res.profit_percentage = if res.total_recyle_price == 0 {
                 0.0
             } else {
-                res.profit_total_value as f32 / res.total_value as f32 * 100.0
+                res.total_profit_price as f32 / res.total_recyle_price as f32 * 100.0
             };
         }
 
@@ -229,57 +226,74 @@ impl FavoritesData {
             .into_iter()
             .filter(|x| x.created_on >= recent_sec)
             .collect();
-        recent_items.sort_by(|a, b| b.profit_total_value.cmp(&a.profit_total_value));
+        recent_items.sort_by(|a, b| b.total_profit_price.cmp(&a.total_profit_price));
 
         let mut old_items: Vec<ProfitUserInfo> = items
             .clone()
             .into_iter()
             .filter(|x| x.created_on < recent_sec)
             .collect();
-        old_items.sort_by(|a, b| b.profit_total_value.cmp(&a.profit_total_value));
+        old_items.sort_by(|a, b| b.total_profit_price.cmp(&a.total_profit_price));
 
+        // 子项中按利润排序
         recent_items.extend(old_items);
+        recent_items.iter_mut().for_each(|x| {
+            x.items.sort_by(|a, b| {
+                b.final_profit
+                    .total_profit_value
+                    .cmp(&a.final_profit.total_profit_value)
+            })
+        });
+
         recent_items
     }
 }
 
 /// 用户维度 利润信息
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct ProfitUserInfo {
     pub player_id: i32,
     pub player_name: String,
-    pub total_value: u64,
-    pub profit_total_value: i64,
+    pub total_recyle_price: u64,
+    pub total_profit_price: i64,
     pub profit_percentage: f32,
     pub created_on: u64, // 拉取到的时间戳
     pub items: Vec<ProfitInfo>,
 }
 
 /// 商品维度 利润信息
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct ProfitInfo {
     pub player_id: i32,
     pub player_name: String,
     pub quantity: i32,
-    // 用户售卖价格
-    pub price: u64,
-    pub total_value: u64,
+    /// 单个回收价格
+    pub single_recyle_price: u64,
     pub image: String,
+    /// 市场利润
     pub market_profit: ProfitMetrics,
+    /// 平均 bazaar 利润
     pub avg_bazaar_profit: ProfitMetrics,
+    /// 官方利润
+    pub office_profit: Option<ProfitMetrics>,
     // 按照最低的数据进行复制
     pub final_profit: ProfitMetrics,
 
     pub id: i32,
     pub name: String,
-    pub market_price: u64,
-    pub avg_bazaar_price: u64,
-    /// 最终二次售价,回收后卖出的价格
-    pub final_sell_price: u64,
     pub created_on: u64, // 拉取到的时间戳
+}
 
-    /// 是否在官方售卖
-    pub is_office: bool,
+impl ProfitInfo {
+    /// 商品回收总价格
+    pub fn total_recyle_price(&self) -> u64 {
+        self.quantity as u64 * self.single_recyle_price
+    }
+
+    /// 商品最终总售价
+    pub fn total_sell_price(&self) -> u64 {
+        self.quantity as u64 * self.final_profit.single_sell_price
+    }
 }
 
 impl ProfitInfo {
@@ -306,41 +320,67 @@ impl ProfitInfo {
         res.avg_bazaar_profit = res.avg_bazaar_profit.combine(e.avg_bazaar_profit);
         res.final_profit = res.final_profit.combine(e.final_profit);
 
-        res.market_profit.total_value *= total_quantity as i64;
-        res.avg_bazaar_profit.total_value *= total_quantity as i64;
-        res.final_profit.total_value *= total_quantity as i64;
+        res.market_profit = res.market_profit.build(total_quantity);
+        res.avg_bazaar_profit = res.avg_bazaar_profit.build(total_quantity);
+        res.final_profit = res.final_profit.build(total_quantity);
 
         res.quantity = total_quantity;
-        res.price = (res.price * self.quantity as u64 + data.price * data.quantity as u64)
+        res.single_recyle_price = (res.single_recyle_price * self.quantity as u64
+            + data.single_recyle_price * data.quantity as u64)
             / (self.quantity as u64 + data.quantity as u64);
         res
     }
 }
 
 /// 利润计算结果
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct ProfitMetrics {
+    /// 利润百分比
     pub percentage: f32,
     /// 单个利润
-    pub single_value: i64,
+    pub single_profit_value: i64,
     /// 总利润
-    pub total_value: i64,
+    pub total_profit_value: i64,
+    /// 二次出售
+    /// 单个售价
+    pub single_sell_price: u64,
+    /// 总售价
+    pub total_sell_price: u64,
+    /// 是否在官方售卖
+    pub is_office: bool,
 }
 
 impl ProfitMetrics {
     fn single_value(&self, quantity: i32) -> Self {
         Self {
             percentage: self.percentage,
-            single_value: self.single_value,
-            total_value: self.total_value / quantity as i64,
+            single_profit_value: self.single_profit_value,
+            total_profit_value: self.total_profit_value / quantity as i64,
+            single_sell_price: self.single_sell_price,
+            total_sell_price: self.total_sell_price / quantity as u64,
+            is_office: self.is_office,
         }
     }
 
     fn combine(&self, data: Self) -> Self {
         Self {
             percentage: (self.percentage + data.percentage) / 2.,
-            single_value: (self.single_value + data.single_value) / 2,
-            total_value: (self.total_value + data.total_value) / 2,
+            single_profit_value: (self.single_profit_value + data.single_profit_value) / 2,
+            total_profit_value: (self.total_profit_value + data.total_profit_value) / 2,
+            single_sell_price: (self.single_sell_price + data.single_sell_price) / 2,
+            total_sell_price: (self.total_sell_price + data.total_sell_price) / 2,
+            is_office: self.is_office,
+        }
+    }
+
+    fn build(&self, quantity: i32) -> Self {
+        Self {
+            percentage: self.percentage,
+            single_profit_value: self.single_profit_value,
+            total_profit_value: self.total_profit_value * quantity as i64,
+            single_sell_price: self.single_sell_price,
+            total_sell_price: self.total_sell_price * quantity as u64,
+            is_office: self.is_office,
         }
     }
 }
@@ -348,10 +388,10 @@ impl ProfitMetrics {
 /// 选中的利润计算结果
 #[derive(Debug, Clone)]
 struct SelectedProfit {
-    final_profit: ProfitMetrics,
+    final_profit: Option<ProfitMetrics>,
     market: ProfitMetrics,
     bazaar: ProfitMetrics,
-    used_office: bool,
+    office: Option<ProfitMetrics>,
 }
 
 /// 统一的利润计算函数
@@ -359,69 +399,76 @@ struct SelectedProfit {
 /// - 不在 target_ids 中：使用官方价格计算利润，如果没有官方价格则返回 None
 fn compute_profit(
     in_target_ids: bool,
-    user_price: i64,
+    user_price: u64,
     quantity: i32,
     market_price: i64,
     avg_bazaar_price: i64,
     office_sell_price: Option<i64>,
-) -> Option<(SelectedProfit, u64)> {
+) -> SelectedProfit {
     let q = quantity as i64;
 
-    let market_diff = market_price - user_price;
+    let market_diff = market_price - user_price as i64;
     let market = ProfitMetrics {
         percentage: market_diff as f32 / market_price as f32 * 100.0,
-        single_value: market_diff,
-        total_value: market_diff * q,
+        single_profit_value: market_diff,
+        total_profit_value: market_diff * q,
+        single_sell_price: market_price as u64,
+        total_sell_price: market_price as u64 * q as u64,
+        is_office: false,
     };
 
-    let bazaar_diff = avg_bazaar_price - user_price;
+    let bazaar_diff = avg_bazaar_price - user_price as i64;
     let bazaar = ProfitMetrics {
         percentage: bazaar_diff as f32 / avg_bazaar_price as f32 * 100.0,
-        single_value: bazaar_diff,
-        total_value: bazaar_diff * q,
+        single_profit_value: bazaar_diff,
+        total_profit_value: bazaar_diff * q,
+        single_sell_price: avg_bazaar_price as u64,
+        total_sell_price: avg_bazaar_price as u64 * q as u64,
+        is_office: false,
+    };
+
+    let office = office_sell_price.map(|office_price| ProfitMetrics {
+        percentage: (office_price - user_price as i64) as f32 / office_price as f32 * 100.0,
+        single_profit_value: office_price - user_price as i64,
+        total_profit_value: (office_price - user_price as i64) * q,
+        single_sell_price: office_price as u64,
+        total_sell_price: office_price as u64 * q as u64,
+        is_office: true,
+    });
+
+    let mut pick_market = if market.percentage <= bazaar.percentage {
+        market.clone()
+    } else {
+        bazaar.clone()
     };
 
     if in_target_ids {
-        let pick_market = market.percentage <= bazaar.percentage;
-        let (chosen, final_price) = if pick_market {
-            (&market, market_price)
-        } else {
-            (&bazaar, avg_bazaar_price)
-        };
-        Some((
-            SelectedProfit {
-                final_profit: ProfitMetrics {
-                    percentage: chosen.percentage,
-                    single_value: chosen.single_value,
-                    total_value: chosen.total_value,
-                },
-                market,
-                bazaar,
-                used_office: false,
-            },
-            final_price as u64,
-        ))
+        if let Some(office_profit) = &office
+            && office_profit.percentage >= pick_market.percentage
+        {
+            pick_market = office_profit.clone()
+        }
+        SelectedProfit {
+            final_profit: Some(pick_market),
+            market,
+            bazaar,
+            office,
+        }
     } else {
-        let ref_price = office_sell_price?;
-        let diff = ref_price - user_price;
-        let pct = if ref_price > 0 {
-            diff as f32 / ref_price as f32 * 100.0
-        } else {
-            0.0
-        };
-        Some((
-            SelectedProfit {
-                final_profit: ProfitMetrics {
-                    percentage: pct,
-                    single_value: diff,
-                    total_value: diff * q,
-                },
+        let Some(office_profit) = office.clone() else {
+            return SelectedProfit {
+                final_profit: None,
                 market,
                 bazaar,
-                used_office: true,
-            },
-            ref_price as u64,
-        ))
+                office,
+            };
+        };
+        SelectedProfit {
+            final_profit: Some(office_profit),
+            market,
+            bazaar,
+            office,
+        }
     }
 }
 
@@ -461,4 +508,51 @@ pub struct FilterItem {
 #[derive(Debug, Clone, Default)]
 pub struct SortProfitParams {
     pub recent_sec: u64,
+}
+
+impl ContentHashable for ProfitInfo {
+    fn content_hash(&self) -> ContentHash {
+        let mut hasher = StableHasher::new();
+        hasher.write_i32(self.id);
+        hasher.write_str(&self.name);
+        hasher.write_i32(self.quantity);
+        hasher.write_u64(self.single_recyle_price);
+        hasher.write_str(&self.image);
+        hasher.write_u64(self.created_on);
+        
+        let final_profit_hash = self.final_profit.content_hash().0;
+        hasher.write_u64(final_profit_hash);
+        
+        hasher.finish()
+    }
+}
+
+impl ContentHashable for ProfitMetrics {
+    fn content_hash(&self) -> ContentHash {
+        let mut hasher = StableHasher::new();
+        hasher.write_f32(self.percentage);
+        hasher.write_i64(self.single_profit_value);
+        hasher.write_i64(self.total_profit_value);
+        hasher.write_u64(self.single_sell_price);
+        hasher.write_u64(self.total_sell_price);
+        hasher.write_u64(if self.is_office { 1 } else { 0 });
+        hasher.finish()
+    }
+}
+
+impl ContentHashable for ProfitUserInfo {
+    fn content_hash(&self) -> ContentHash {
+        let mut hasher = StableHasher::new();
+        hasher.write_i32(self.player_id);
+        hasher.write_str(&self.player_name);
+        hasher.write_u64(self.total_recyle_price);
+        hasher.write_i64(self.total_profit_price);
+        hasher.write_f32(self.profit_percentage);
+        hasher.write_u64(self.created_on);
+        
+        let items_hash = self.items.content_hash().0;
+        hasher.write_u64(items_hash);
+        
+        hasher.finish()
+    }
 }

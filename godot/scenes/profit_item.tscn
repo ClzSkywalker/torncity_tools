@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d3ngevu4ijcq6"]
 
 [node name="ProfitItem" type="ProfitItem" unique_id=1137593024]
-custom_minimum_size = Vector2(0, 70)
+custom_minimum_size = Vector2(300, 70)
 size_flags_horizontal = 3
 size_flags_vertical = 0
 mouse_filter = 1
@@ -15,10 +15,20 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
 
-[node name="Label" type="Label" parent="VBox" unique_id=336054901]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBox" unique_id=1248582363]
+layout_mode = 2
+
+[node name="TotalPriceBuy" type="Label" parent="VBox/HBoxContainer" unique_id=1854416184]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Name: Final Profit"
+size_flags_horizontal = 2
+text = "Total Buy:1111"
+
+[node name="TotalPriceSell" type="Label" parent="VBox/HBoxContainer" unique_id=576938754]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+text = "Total Sell:111"
 
 [node name="HBox" type="HBoxContainer" parent="VBox" unique_id=125076260]
 layout_mode = 2

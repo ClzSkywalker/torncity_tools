@@ -59,12 +59,16 @@ impl Weav3rItem {
         self.item = item;
     }
 
+    pub fn get_player_id(&self) -> i32 {
+        self.item.player_id
+    }
+
     fn update_ui(&mut self) {
         if let Some(user_name) = self.user_name.as_mut() {
             user_name.set_text(format!("Name:{}", self.item.player_name).as_str());
         }
         if let Some(total_profit) = self.total_profit.as_mut() {
-            total_profit.set_text(format!("Profit:{}", self.item.profit_total_value).as_str());
+            total_profit.set_text(format!("Profit:{}", self.item.total_profit_price).as_str());
         }
         if let Some(link_button) = self.link_button.as_mut() {
             link_button.set_uri(get_bazaar_url(self.item.player_id).as_str());

@@ -1,4 +1,4 @@
-.PHONY: build rust-release godot-lsp
+.PHONY: build rust-release godot-lsp mock-server
 
 RUST_MANIFEST ?= rust/Cargo.toml
 RUST_CRATE ?= bin
@@ -15,5 +15,6 @@ clippy:
 godot-lsp:
 	$(GODOT_BIN) --headless --path $(GODOT_PROJECT_DIR) --lsp-port 6005
 
-office-sell:
-	cargo run -p tools-cli --manifest-path $(RUST_MANIFEST)
+# 后台启动 mock_server
+mock-server:
+	cargo run -p mock_server --manifest-path $(RUST_MANIFEST) &

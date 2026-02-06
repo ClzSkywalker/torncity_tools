@@ -11,6 +11,7 @@ size_flags_vertical = 3
 [node name="Timer" type="Timer" parent="." unique_id=927856033]
 wait_time = 5.0
 autostart = true
+pause_mode = 2
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=384720574]
 stream = ExtResource("1_eu7jx")

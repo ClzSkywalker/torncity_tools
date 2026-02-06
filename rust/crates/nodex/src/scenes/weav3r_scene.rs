@@ -3,6 +3,7 @@ use model::weav3r::favorites::FavoritesResponse;
 use tools::{
     base::eq_f64,
     node::{INodeFunc, INodeTool},
+    order_change::OrderChangeDetector,
 };
 use weav3r::{
     data::Weav3rSettingData,
@@ -25,6 +26,8 @@ pub struct Weav3rScene {
     /// 每个 item 的期望宽度（用于计算列数）
     #[init(val = 300.0)]
     item_width: f32,
+    /// 上一次渲染的数据列表，用于顺序变更检测
+    last_rendered_items: Vec<ProfitUserInfo>,
 }
 
 #[godot_api]
@@ -158,6 +161,15 @@ impl Weav3rScene {
         _headers: PackedStringArray,
         body: PackedByteArray,
     ) {
+        if response_code != 200 {
+            godot_error!(
+                "Weav3rScene: Failed to get response.code: {}, body: {}",
+                response_code,
+                String::from_utf8_lossy(body.as_slice()).to_string()
+            );
+            return;
+        }
+
         let cfg = match tools::cfg::CfgTool::new(Weav3rSettingData::SETTINGS_PATH) {
             Ok(r) => r,
             Err(err) => {
@@ -180,15 +192,6 @@ impl Weav3rScene {
                 timer.set_wait_time(interval);
                 timer.start();
             }
-        }
-
-        if response_code != 200 {
-            godot_error!(
-                "Weav3rScene: Failed to get response.code: {}, body: {}",
-                response_code,
-                String::from_utf8_lossy(body.as_slice()).to_string()
-            );
-            return;
         }
 
         if let Some(ref mut http) = self.http_request {
@@ -244,8 +247,87 @@ impl Weav3rScene {
     }
 
     fn render_list(&mut self, items: Vec<ProfitUserInfo>) {
+        if items.is_empty() {
+            godot_print!("Weav3rScene: No items to render");
+            self.clear_all_items();
+            return;
+        }
+
+        let detection_result = self.detect_and_render(items.clone());
+
+        if let Err(e) = detection_result {
+            godot_error!("Weav3rScene: Detection failed: {:?}, fallback to full render", e);
+            self.full_render(items);
+        }
+    }
+
+    fn detect_and_render(&mut self, items: Vec<ProfitUserInfo>) -> Result<(), String> {
+        let detector = OrderChangeDetector::new(self.last_rendered_items.clone(), items.clone());
+        let report = detector.detect().map_err(|e| format!("Detection error: {}", e))?;
+
+        godot_print!(
+            "Weav3rScene: {}",
+            report.summary()
+        );
+
+        if !report.has_changes {
+            godot_print!("Weav3rScene: No changes detected, skipping render");
+            return Ok(());
+        }
+
+        if report.has_only_order_changes() {
+            godot_print!("Weav3rScene: Order only changed, adjusting UI order");
+            self.adjust_item_order(&items)?;
+        } else {
+            godot_print!("Weav3rScene: Content changed, full render");
+            self.full_render(items);
+        }
+
+        Ok(())
+    }
+
+    fn adjust_item_order(&mut self, target_items: &[ProfitUserInfo]) -> Result<(), String> {
         let grid_container = self.grid_container.clone();
-        let Some(mut grid_container) = grid_container else {
+        let mut grid_container = grid_container.ok_or("GridContainer node not found")?;
+
+        let children = grid_container.get_children();
+        let mut child_map: std::collections::HashMap<i32, Gd<Node>> = std::collections::HashMap::new();
+
+        for child in children.iter_shared() {
+            if let Ok(weav3r_item) = child.try_cast::<Weav3rItem>() {
+                let player_id = weav3r_item.bind().get_player_id();
+                child_map.insert(player_id, weav3r_item.upcast::<Node>());
+            }
+        }
+
+        for (target_index, item) in target_items.iter().enumerate() {
+            if let Some(child) = child_map.get(&item.player_id) {
+                let current_index = grid_container.get_index();
+                if current_index as usize != target_index {
+                    grid_container.move_child(child, target_index as i32);
+                }
+                child_map.remove(&item.player_id);
+            }
+        }
+
+        if !child_map.is_empty() {
+            godot_error!(
+                "Weav3rScene: Found {} orphaned items that should be removed",
+                child_map.len()
+            );
+        }
+
+        Ok(())
+    }
+
+    fn full_render(&mut self, items: Vec<ProfitUserInfo>) {
+        self.clear_all_items();
+        self.add_all_items(items);
+    }
+
+    fn clear_all_items(&mut self) {
+        let grid_container = self.grid_container.clone();
+        let Some(grid_container) = grid_container else {
             godot_error!("Weav3rScene: GridContainer node not found.");
             return;
         };
@@ -255,16 +337,26 @@ impl Weav3rScene {
             let mut child = child.clone();
             child.queue_free();
         }
+    }
 
-        for item in items {
+    fn add_all_items(&mut self, items: Vec<ProfitUserInfo>) {
+        let grid_container = self.grid_container.clone();
+        let Some(mut grid_container) = grid_container else {
+            godot_error!("Weav3rScene: GridContainer node not found.");
+            return;
+        };
+
+        for item in items.iter() {
             let Some(mut weav3r_item) = Weav3rItem::get_scene_instance() else {
                 godot_error!("Weav3rScene: Failed to get Weav3rItem");
                 continue;
             };
-            weav3r_item.bind_mut().set_item(item);
+            weav3r_item.bind_mut().set_item(item.clone());
             let child = weav3r_item.upcast::<Node>();
-            grid_container.call_deferred("add_child", &[child.to_variant()]);
+            grid_container.add_child(&child);
         }
+
+        self.last_rendered_items = items;
     }
 
     #[func]

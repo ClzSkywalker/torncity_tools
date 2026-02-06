@@ -35,6 +35,8 @@ impl Weav3rHttpRequest {
 
         let mut http = HttpTool::default();
         http.set_url("https://weav3r.dev/favorites");
+        // http.set_url("http://0.0.0.0:8666/favorites");
+        http.set_method(godot::classes::http_client::Method::POST);
         http.add_header("Connection", "keep-alive");
         http.add_header("Accept", "text/x-component");
         http.add_header("Accept-Encoding", "gzip, deflate, br");
@@ -42,9 +44,8 @@ impl Weav3rHttpRequest {
         http.add_header("Content-Type", "text/plain;charset=UTF-8");
         http.add_header("Next-Action", next_action.as_str());
         http.add_header("Cookie", "cf_clearance=LGkK7gXt4rzJAEpcbm00jNjfFMdYzjEsFo8M63HG49A-1768298710-1.2.1.1-Qquf0_4B_Ei7ZCmews9rVovka9v0ushpbQTDxbC2pNiriRj9k.PvUeUv9FclLRc6y2.zRBrPUpaLh3u6cftrKohRgHsbn3YJZUu2cFjh5r4uVf6ieqLgu1e4C3l0iJkLcq0fVc0BtqnaLsAqoPn2c68WBB0zo3tQdmlu9ldEcryDQaNkc5n7IIMcZoydCjNPMoobIfz2ESlDX132FsDkOWFnej73oSkEKOBe124hdDw");
-        http.set_method(godot::classes::http_client::Method::POST);
         http.set_body(format!("[[{}]]", target_ids).as_bytes().to_vec());
-        godot_print!("Weav3rHttpRequest: Sending request with body: {}", target_ids);
+        // godot_print!("Weav3rHttpRequest: Sending request with body: {}", target_ids);
         let request_result = http.send_request(&mut self.base_mut());
         if let Err(err) = request_result {
             godot_error!("Weav3rHttpRequest failed: {:?}", err);
@@ -56,7 +57,10 @@ impl Weav3rHttpRequest {
     pub fn on_request_completed(&mut self) {
         if let Some(start_time) = self.start_time.take() {
             let duration = start_time.elapsed();
-            godot_print!("Weav3rHttpRequest: Request completed in {:.3}s", duration.as_secs_f64());
+            godot_print!(
+                "Weav3rHttpRequest: Request completed in {:.3}s",
+                duration.as_secs_f64()
+            );
         }
     }
 }
