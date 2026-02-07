@@ -26,3 +26,14 @@ thiserror = "2"
 csv = "1.4"
 tokio = { version = "1", features = ["full"] }
 axum = "0.8"
+
+# debug = 0	不生成任何调试信息
+# debug = 1	仅生成基础调试信息
+# debug = 2	生成完整调试信息（推荐用于调试）
+[profile.dev]
+debug = 2  # 生成完整调试符号（等同于 true）
+opt-level = 0  # 禁用优化，确保调试器能准确显示变量
+split-debuginfo = "unpacked"  # 改善调试器性能
+
+[profile.release]
+debug = 1       # 生成部分调试信息（如行号）

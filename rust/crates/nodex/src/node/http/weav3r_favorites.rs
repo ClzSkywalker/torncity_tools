@@ -35,7 +35,7 @@ impl Weav3rHttpRequest {
 
         let mut http = HttpTool::default();
         http.set_url("https://weav3r.dev/favorites");
-        // http.set_url("http://0.0.0.0:8666/favorites");
+        // http.set_url("http://127.0.0.1:8666/favorites");
         http.set_method(godot::classes::http_client::Method::POST);
         http.add_header("Connection", "keep-alive");
         http.add_header("Accept", "text/x-component");
@@ -43,7 +43,7 @@ impl Weav3rHttpRequest {
         http.add_header("Accept-Language", "zh-CN,zh;q=0.8");
         http.add_header("Content-Type", "text/plain;charset=UTF-8");
         http.add_header("Next-Action", next_action.as_str());
-        http.add_header("Cookie", "cf_clearance=LGkK7gXt4rzJAEpcbm00jNjfFMdYzjEsFo8M63HG49A-1768298710-1.2.1.1-Qquf0_4B_Ei7ZCmews9rVovka9v0ushpbQTDxbC2pNiriRj9k.PvUeUv9FclLRc6y2.zRBrPUpaLh3u6cftrKohRgHsbn3YJZUu2cFjh5r4uVf6ieqLgu1e4C3l0iJkLcq0fVc0BtqnaLsAqoPn2c68WBB0zo3tQdmlu9ldEcryDQaNkc5n7IIMcZoydCjNPMoobIfz2ESlDX132FsDkOWFnej73oSkEKOBe124hdDw");
+        http.add_header("Cookie", "__tf_verified=1770523246123.d9523b2d4ad89d39d12ffb5149f3f389c07d041a96110aaa958c6e1ceed6cd32; _ga=GA1.1.302505827.1770436850; cf_clearance=w.lAzd_L1NsCH.uSgBVOHmVFGk_gzv90AGKBgEP5NBA-1770436848-1.2.1.1-9inhhxy4h4GnLkeLOJhKCkGtZJMXwTNm6eu0pRfZfPzB3jFInbUZSwZDQFgvmqcspU5Lzp7wxcrag8tDeQbTzw1jNM7TLs.EC7sdEXcLQEbfcuESOG5lotPBIys94zlsqIf8h5IaYYanXWGAH1eM6EQPEVUzS.zetr0EKsiqOprrLJMZZ9C5zFKVJPmlmS1yPzDGpoQf532zhcJX4BUTmuAB10WCmJmlxT_qG9eZ7E4; _ga_PF693NSPW1=GS2.1.s1770436850$o1$g1$t1770436880$j30$l0$h0");
         http.set_body(format!("[[{}]]", target_ids).as_bytes().to_vec());
         // godot_print!("Weav3rHttpRequest: Sending request with body: {}", target_ids);
         let request_result = http.send_request(&mut self.base_mut());
@@ -54,7 +54,7 @@ impl Weav3rHttpRequest {
     }
 
     #[func]
-    pub fn on_request_completed(&mut self) {
+    pub fn on_request_completed(&mut self,code :i64) {
         if let Some(start_time) = self.start_time.take() {
             let duration = start_time.elapsed();
             godot_print!(
@@ -62,5 +62,6 @@ impl Weav3rHttpRequest {
                 duration.as_secs_f64()
             );
         }
+        
     }
 }

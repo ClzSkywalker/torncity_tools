@@ -139,6 +139,8 @@ impl Weav3rScene {
             .filter(|x| x.tradeable && x.sell_price >= office_sell_price)
             .map(|x| x.id)
             .chain(f_target_ids)
+            .collect::<std::collections::HashSet<_>>()
+            .into_iter()
             .map(|x| x.to_string())
             .collect::<Vec<String>>()
             .join(",");
@@ -161,11 +163,28 @@ impl Weav3rScene {
         _headers: PackedStringArray,
         body: PackedByteArray,
     ) {
+        if let Some(ref mut http) = self.http_request {
+            http.bind_mut().on_request_completed(response_code);
+        }
         if response_code != 200 {
             godot_error!(
                 "Weav3rScene: Failed to get response.code: {}, body: {}",
                 response_code,
                 String::from_utf8_lossy(body.as_slice()).to_string()
+            );
+            return;
+        }
+
+        let response_text = String::from_utf8_lossy(body.as_slice());
+        // 如果响应结果不是0开头，则视为请求失败
+        if !response_text.starts_with('0') {
+            godot_error!(
+                "Weav3rScene: Request failed - response does not start with '0'. Response: {}",
+                if response_text.len() > 500 {
+                    format!("{}...", &response_text[..500])
+                } else {
+                    response_text.to_string()
+                }
             );
             return;
         }
@@ -194,10 +213,6 @@ impl Weav3rScene {
             }
         }
 
-        if let Some(ref mut http) = self.http_request {
-            http.bind_mut().on_request_completed();
-        }
-
         let cfg = match tools::cfg::CfgTool::new(Weav3rSettingData::SETTINGS_PATH) {
             Ok(r) => r,
             Err(err) => {
@@ -216,7 +231,7 @@ impl Weav3rScene {
         self.favorites_res.filter.min_profit_percentage = setting_data.get_profit_percent();
         self.favorites_res.filter.office_sell_price = setting_data.get_office_sell_price();
         self.favorites_res.filter.office_sell_profit = setting_data.get_office_sell_profit();
-        let response_text = String::from_utf8_lossy(body.as_slice());
+
         let favorites_response = match FavoritesResponse::from_text(&response_text) {
             Ok(r) => r,
             Err(err) => {
@@ -256,19 +271,21 @@ impl Weav3rScene {
         let detection_result = self.detect_and_render(items.clone());
 
         if let Err(e) = detection_result {
-            godot_error!("Weav3rScene: Detection failed: {:?}, fallback to full render", e);
+            godot_error!(
+                "Weav3rScene: Detection failed: {:?}, fallback to full render",
+                e
+            );
             self.full_render(items);
         }
     }
 
     fn detect_and_render(&mut self, items: Vec<ProfitUserInfo>) -> Result<(), String> {
         let detector = OrderChangeDetector::new(self.last_rendered_items.clone(), items.clone());
-        let report = detector.detect().map_err(|e| format!("Detection error: {}", e))?;
+        let report = detector
+            .detect()
+            .map_err(|e| format!("Detection error: {}", e))?;
 
-        godot_print!(
-            "Weav3rScene: {}",
-            report.summary()
-        );
+        godot_print!("Weav3rScene: {}", report.summary());
 
         if !report.has_changes {
             godot_print!("Weav3rScene: No changes detected, skipping render");
@@ -291,7 +308,8 @@ impl Weav3rScene {
         let mut grid_container = grid_container.ok_or("GridContainer node not found")?;
 
         let children = grid_container.get_children();
-        let mut child_map: std::collections::HashMap<i32, Gd<Node>> = std::collections::HashMap::new();
+        let mut child_map: std::collections::HashMap<i32, Gd<Node>> =
+            std::collections::HashMap::new();
 
         for child in children.iter_shared() {
             if let Ok(weav3r_item) = child.try_cast::<Weav3rItem>() {

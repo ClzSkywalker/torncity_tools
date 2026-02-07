@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use godot::global::godot_error;
+use godot::global::{godot_error, godot_print};
 use model::{items::ItemInfo, weav3r::favorites::ProductionItem};
-use tools::order_change::{ContentHashable, ContentHash, hash::StableHasher};
+use tools::order_change::{ContentHash, ContentHashable, hash::StableHasher};
 
 #[derive(Debug, Clone, Default)]
 pub struct FavoritesData {
@@ -17,10 +17,27 @@ pub struct FavoritesData {
 
 impl FavoritesData {
     pub fn set_new_profit(&mut self, productions: Vec<ProductionItem>) {
+        for ele in productions.iter() {
+            if ele.id != 272 {
+                continue;
+            }
+            godot_print!("value: {:?}", ele);
+        }
         let profit_items: Vec<ProfitInfo> = productions
             .iter()
             .flat_map(|x| self.product_to_profit_info(x.clone()))
             .collect();
+        for ele in profit_items.iter() {
+            if ele.id != 272 {
+                continue;
+            }
+            godot_print!(
+                "player_name: {}, name: {}, quality: {}",
+                ele.player_name,
+                ele.name,
+                ele.quantity
+            );
+        }
         let profit_items = Self::combine(profit_items);
         let profit_items = Self::filter(profit_items, self.filter.clone());
         let user_profit_result = Self::calc_user_profit(profit_items.clone());
@@ -519,10 +536,10 @@ impl ContentHashable for ProfitInfo {
         hasher.write_u64(self.single_recyle_price);
         hasher.write_str(&self.image);
         hasher.write_u64(self.created_on);
-        
+
         let final_profit_hash = self.final_profit.content_hash().0;
         hasher.write_u64(final_profit_hash);
-        
+
         hasher.finish()
     }
 }
@@ -549,10 +566,10 @@ impl ContentHashable for ProfitUserInfo {
         hasher.write_i64(self.total_profit_price);
         hasher.write_f32(self.profit_percentage);
         hasher.write_u64(self.created_on);
-        
+
         let items_hash = self.items.content_hash().0;
         hasher.write_u64(items_hash);
-        
+
         hasher.finish()
     }
 }

@@ -14,7 +14,8 @@
                 "-w" // windowed mode
                 // "-e": editor does not keep breakpoints; thus not listed here.
             ],
-            "program": "/Applications/Godot.app",
+            // "program": "/Applications/Godot.app",
+            "program": "D:\\code\\Godot4.6\\Godot.exe",
             "sourceLanguages": ["rust"],
         }
     ]

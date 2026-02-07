@@ -90,13 +90,7 @@ impl IControl for Weav3rSettingScene {
             godot_error!("Weav3rSettingScene: office_sell_price_edit node not found.");
         }
         if let Some(edit) = self.office_sell_profit_edit.as_mut() {
-            let value = setting_data.get_office_sell_price();
-            edit.set_value(value as f64);
-        } else {
-            godot_error!("Weav3rSettingScene: office_sell_profit_edit node not found.");
-        }
-        if let Some(edit) = self.office_sell_profit_edit.as_mut() {
-            let value = setting_data.get_office_sell_price();
+            let value = setting_data.get_office_sell_profit();
             edit.set_value(value as f64);
         } else {
             godot_error!("Weav3rSettingScene: office_sell_profit_edit node not found.");
