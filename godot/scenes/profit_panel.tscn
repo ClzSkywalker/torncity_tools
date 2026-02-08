@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b36gsqhuu7uko"]
 
 [ext_resource type="PackedScene" uid="uid://hvcoiyibi46e" path="res://node/icon_http_request.tscn" id="1_k110n"]
+[ext_resource type="Texture2D" uid="uid://dcs677755cuhu" path="res://assets/icons/shop.png" id="2_k110n"]
 
 [node name="ProfitPanel" type="ProfitPanel" unique_id=1879942204]
 anchors_preset = 10
@@ -22,6 +23,13 @@ theme_override_constants/separation = 4
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
+
+[node name="OfficeIcon" type="TextureRect" parent="VBoxContainer/HBoxContainer" unique_id=1596274948]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+texture = ExtResource("2_k110n")
+expand_mode = 2
 
 [node name="VBox" type="VBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=1145129035]
 layout_mode = 2

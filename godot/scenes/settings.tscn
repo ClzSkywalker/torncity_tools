@@ -9,7 +9,7 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="TopBar" type="VBoxContainer" parent="." unique_id=188358475]
+[node name="Container" type="PanelContainer" parent="." unique_id=1784793614]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -17,57 +17,66 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="InternalVBox" type="HBoxContainer" parent="TopBar" unique_id=686418141]
+[node name="ScrollContainer" type="ScrollContainer" parent="Container" unique_id=1194569763]
+layout_mode = 2
+scroll_hint_mode = 1
+
+[node name="TopBar" type="VBoxContainer" parent="Container/ScrollContainer" unique_id=188358475]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="InternalVBox" type="HBoxContainer" parent="Container/ScrollContainer/TopBar" unique_id=686418141]
 layout_mode = 2
 
-[node name="IntervalLabel" type="Label" parent="TopBar/InternalVBox" unique_id=192457143]
+[node name="IntervalLabel" type="Label" parent="Container/ScrollContainer/TopBar/InternalVBox" unique_id=192457143]
 layout_mode = 2
 size_flags_horizontal = 2
 text = "Interval(s): "
 
-[node name="IntervalEdit" type="SpinBox" parent="TopBar/InternalVBox" unique_id=2116784401]
+[node name="IntervalEdit" type="SpinBox" parent="Container/ScrollContainer/TopBar/InternalVBox" unique_id=2116784401]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 10
 value = 5.0
 rounded = true
 
-[node name="AudioVBox" type="HBoxContainer" parent="TopBar" unique_id=1213435087]
+[node name="AudioVBox" type="HBoxContainer" parent="Container/ScrollContainer/TopBar" unique_id=1213435087]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="TopBar/AudioVBox" unique_id=20558396]
+[node name="Label" type="Label" parent="Container/ScrollContainer/TopBar/AudioVBox" unique_id=20558396]
 layout_mode = 2
 size_flags_horizontal = 2
 text = "Audio:"
 
-[node name="CheckButton" type="CheckButton" parent="TopBar/AudioVBox" unique_id=474081469]
+[node name="CheckButton" type="CheckButton" parent="Container/ScrollContainer/TopBar/AudioVBox" unique_id=474081469]
 layout_mode = 2
 size_flags_horizontal = 10
 button_pressed = true
 
-[node name="ProfitPercentVBox" type="HBoxContainer" parent="TopBar" unique_id=1370609047]
+[node name="ProfitPercentVBox" type="HBoxContainer" parent="Container/ScrollContainer/TopBar" unique_id=1370609047]
 layout_mode = 2
 
-[node name="ProfitPercentLabel" type="Label" parent="TopBar/ProfitPercentVBox" unique_id=426619834]
+[node name="ProfitPercentLabel" type="Label" parent="Container/ScrollContainer/TopBar/ProfitPercentVBox" unique_id=426619834]
 layout_mode = 2
 size_flags_horizontal = 2
 text = "Profit Percent: "
 
-[node name="ProfitPercentEdit" type="SpinBox" parent="TopBar/ProfitPercentVBox" unique_id=2118192040]
+[node name="ProfitPercentEdit" type="SpinBox" parent="Container/ScrollContainer/TopBar/ProfitPercentVBox" unique_id=2118192040]
 unique_name_in_owner = true
 layout_mode = 2
 step = 0.1
 value = 4.0
 
-[node name="MinProfitVBox" type="HBoxContainer" parent="TopBar" unique_id=901387988]
+[node name="MinProfitVBox" type="HBoxContainer" parent="Container/ScrollContainer/TopBar" unique_id=901387988]
 layout_mode = 2
 
-[node name="MinProfitLabel" type="Label" parent="TopBar/MinProfitVBox" unique_id=240777899]
+[node name="MinProfitLabel" type="Label" parent="Container/ScrollContainer/TopBar/MinProfitVBox" unique_id=240777899]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Minimum profit:"
 
-[node name="MinProfitEdit" type="SpinBox" parent="TopBar/MinProfitVBox" unique_id=2072351256]
+[node name="MinProfitEdit" type="SpinBox" parent="Container/ScrollContainer/TopBar/MinProfitVBox" unique_id=2072351256]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -76,15 +85,15 @@ step = 1000.0
 value = 100000.0
 rounded = true
 
-[node name="OfficeCellPriceVBox" type="HBoxContainer" parent="TopBar" unique_id=2021125571]
+[node name="OfficeCellPriceVBox" type="HBoxContainer" parent="Container/ScrollContainer/TopBar" unique_id=2021125571]
 layout_mode = 2
 
-[node name="MinProfitLabel" type="Label" parent="TopBar/OfficeCellPriceVBox" unique_id=1678627140]
+[node name="MinProfitLabel" type="Label" parent="Container/ScrollContainer/TopBar/OfficeCellPriceVBox" unique_id=1678627140]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Office Price Start:"
 
-[node name="OfficeSellPriceEdit" type="SpinBox" parent="TopBar/OfficeCellPriceVBox" unique_id=477757865]
+[node name="OfficeSellPriceEdit" type="SpinBox" parent="Container/ScrollContainer/TopBar/OfficeCellPriceVBox" unique_id=477757865]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -93,15 +102,15 @@ step = 100.0
 value = 1000.0
 rounded = true
 
-[node name="OfficeCellProfitVBox" type="HBoxContainer" parent="TopBar" unique_id=240063190]
+[node name="OfficeCellProfitVBox" type="HBoxContainer" parent="Container/ScrollContainer/TopBar" unique_id=240063190]
 layout_mode = 2
 
-[node name="MinProfitLabel" type="Label" parent="TopBar/OfficeCellProfitVBox" unique_id=908185390]
+[node name="MinProfitLabel" type="Label" parent="Container/ScrollContainer/TopBar/OfficeCellProfitVBox" unique_id=908185390]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Office Profit:"
 
-[node name="OfficeSellProfitEdit" type="SpinBox" parent="TopBar/OfficeCellProfitVBox" unique_id=1010943956]
+[node name="OfficeSellProfitEdit" type="SpinBox" parent="Container/ScrollContainer/TopBar/OfficeCellProfitVBox" unique_id=1010943956]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -110,39 +119,71 @@ step = 100.0
 value = 10000.0
 rounded = true
 
-[node name="TokenVBox" type="HBoxContainer" parent="TopBar" unique_id=1971497604]
+[node name="FilterIdVBox" type="VBoxContainer" parent="Container/ScrollContainer/TopBar" unique_id=341354117]
 layout_mode = 2
 
-[node name="TokenLabel" type="Label" parent="TopBar/TokenVBox" unique_id=1562374588]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Weav3r Token:"
-
-[node name="TokenEdit" type="TextEdit" parent="TopBar/TokenVBox" unique_id=295408602]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-size_flags_horizontal = 3
-text = "404cb5d1e07e9049af7adcc4201bc257fc4af6aa67"
-
-[node name="FilterIdVBox" type="VBoxContainer" parent="TopBar" unique_id=341354117]
-layout_mode = 2
-
-[node name="FilterIdLabel" type="Label" parent="TopBar/FilterIdVBox" unique_id=499545483]
+[node name="FilterIdLabel" type="Label" parent="Container/ScrollContainer/TopBar/FilterIdVBox" unique_id=499545483]
 layout_mode = 2
 size_flags_vertical = 0
 text = "ids:"
 
-[node name="FilterIdEdit" type="TextEdit" parent="TopBar/FilterIdVBox" unique_id=2043694490]
+[node name="FilterIdEdit" type="TextEdit" parent="Container/ScrollContainer/TopBar/FilterIdVBox" unique_id=2043694490]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(250, 200)
 layout_mode = 2
 text = "385,183,97,902,901,904,129,184,260,903,263,617,272,264,271,267,277,282,276,186,187,215,261,618,273,258,266,268,269,281,274,384,533,555,532,554,530,553,987,986,985,206,586,587,151,556,529,528,36,527,310,35,210,39,37,209,38,541,552,542,638,551,531,550,818,283,370,364,1080,1079,1082,1083,1078,1081,367,366,1485,1486,1494,358"
 wrap_mode = 1
 
-[node name="SaveButton" type="Button" parent="TopBar" unique_id=1183874491]
+[node name="TokenVBox" type="HBoxContainer" parent="Container/ScrollContainer/TopBar" unique_id=1971497604]
+layout_mode = 2
+
+[node name="TokenLabel" type="Label" parent="Container/ScrollContainer/TopBar/TokenVBox" unique_id=1562374588]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Token:"
+
+[node name="TokenEdit" type="TextEdit" parent="Container/ScrollContainer/TopBar/TokenVBox" unique_id=295408602]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CookieVBox" type="HBoxContainer" parent="Container/ScrollContainer/TopBar" unique_id=349863855]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Container/ScrollContainer/TopBar/CookieVBox" unique_id=296334525]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cookie:"
+
+[node name="CookieEdit" type="TextEdit" parent="Container/ScrollContainer/TopBar/CookieVBox" unique_id=43912856]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CurlVBox" type="VBoxContainer" parent="Container/ScrollContainer/TopBar" unique_id=527446569]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Container/ScrollContainer/TopBar/CurlVBox" unique_id=2016404188]
+layout_mode = 2
+text = "Weav3r Curl:"
+
+[node name="CurlEdit" type="TextEdit" parent="Container/ScrollContainer/TopBar/CurlVBox" unique_id=871559334]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+scroll_smooth = true
+
+[node name="SaveWeav3rTokenBtn" type="Button" parent="Container/ScrollContainer/TopBar/CurlVBox" unique_id=121005520]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Save weav3r token"
+
+[node name="SaveButton" type="Button" parent="Container/ScrollContainer/TopBar" unique_id=1183874491]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
 size_flags_horizontal = 4
-text = "Save "
+text = "Save Config"

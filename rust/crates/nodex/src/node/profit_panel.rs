@@ -13,6 +13,7 @@ pub struct ProfitPanel {
     name_label: Option<Gd<Label>>,
     quantity_label: Option<Gd<Label>>,
     image_request: Option<Gd<ImageHttpRequest>>,
+    office_icon: Option<Gd<TextureRect>>,
     vbox_profit_list: Option<Gd<VBoxContainer>>,
 }
 
@@ -22,6 +23,7 @@ impl IPanelContainer for ProfitPanel {
         self.name_label = self.get_node_as::<Label>("%Name");
         self.quantity_label = self.get_node_as::<Label>("%Quantity");
         self.image_request = self.get_node_as::<ImageHttpRequest>("%ImageHttpRequest");
+        self.office_icon = self.get_node_as::<TextureRect>("%OfficeIcon");
         self.vbox_profit_list = self.get_node_as::<VBoxContainer>("%VBoxProfitList");
 
         // 设置 Name 和 Quantity 标签
@@ -30,6 +32,11 @@ impl IPanelContainer for ProfitPanel {
         }
         if let Some(quantity_label) = self.quantity_label.as_mut() {
             quantity_label.set_text(format!("Quantity:{}", self.item.quantity).as_str());
+        }
+        if !self.item.final_profit.is_office
+            && let Some(office_icon) = self.office_icon.as_mut()
+        {
+            office_icon.set_visible(false);
         }
         if let Some(image_request) = self.image_request.as_mut() {
             image_request

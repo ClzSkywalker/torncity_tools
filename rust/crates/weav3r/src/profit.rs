@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use godot::global::{godot_error, godot_print};
+use godot::global::{godot_error};
 use model::{items::ItemInfo, weav3r::favorites::ProductionItem};
 use tools::order_change::{ContentHash, ContentHashable, hash::StableHasher};
 
@@ -17,27 +17,10 @@ pub struct FavoritesData {
 
 impl FavoritesData {
     pub fn set_new_profit(&mut self, productions: Vec<ProductionItem>) {
-        for ele in productions.iter() {
-            if ele.id != 272 {
-                continue;
-            }
-            godot_print!("value: {:?}", ele);
-        }
         let profit_items: Vec<ProfitInfo> = productions
             .iter()
             .flat_map(|x| self.product_to_profit_info(x.clone()))
             .collect();
-        for ele in profit_items.iter() {
-            if ele.id != 272 {
-                continue;
-            }
-            godot_print!(
-                "player_name: {}, name: {}, quality: {}",
-                ele.player_name,
-                ele.name,
-                ele.quantity
-            );
-        }
         let profit_items = Self::combine(profit_items);
         let profit_items = Self::filter(profit_items, self.filter.clone());
         let user_profit_result = Self::calc_user_profit(profit_items.clone());

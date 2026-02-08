@@ -180,8 +180,8 @@ impl Weav3rScene {
         if !response_text.starts_with('0') {
             godot_error!(
                 "Weav3rScene: Request failed - response does not start with '0'. Response: {}",
-                if response_text.len() > 500 {
-                    format!("{}...", &response_text[..500])
+                if response_text.len() > 100 {
+                    format!("{}...", &response_text[..100])
                 } else {
                     response_text.to_string()
                 }
