@@ -1,5 +1,5 @@
 use godot::{
-    classes::{Button, Control, IControl, SpinBox, TextEdit},
+    classes::{Button, Control, DisplayServer, IControl, SpinBox, TextEdit},
     prelude::*,
 };
 use tools::{
@@ -22,8 +22,7 @@ pub struct Weav3rSettingScene {
     office_sell_profit_edit: Option<Gd<SpinBox>>,
     token_edit: Option<Gd<TextEdit>>,
     cookie_edit: Option<Gd<TextEdit>>,
-    curl_edit: Option<Gd<TextEdit>>,
-    save_weav3r_token_btn: Option<Gd<Button>>,
+    parse_weav3r_curl_btn: Option<Gd<Button>>,
     save_button: Option<Gd<Button>>,
 }
 
@@ -39,8 +38,7 @@ impl IControl for Weav3rSettingScene {
         self.office_sell_profit_edit = self.get_node_as::<SpinBox>("%OfficeSellProfitEdit");
         self.token_edit = self.get_node_as::<TextEdit>("%TokenEdit");
         self.cookie_edit = self.get_node_as::<TextEdit>("%CookieEdit");
-        self.curl_edit = self.get_node_as::<TextEdit>("%CurlEdit");
-        self.save_weav3r_token_btn = self.get_node_as::<Button>("%SaveWeav3rTokenBtn");
+        self.parse_weav3r_curl_btn = self.get_node_as::<Button>("%ParseWeav3rCurlBtna");
 
         self.save_button = self.get_node_as::<Button>("%SaveButton");
 
@@ -103,7 +101,9 @@ impl IControl for Weav3rSettingScene {
         }
         if let Some(cookie_edit) = self.cookie_edit.as_mut() {
             let cookie = setting_data.get_cookie();
+            godot_print!("Cookie loaded from config - length: {}", cookie.len());
             cookie_edit.set_text(cookie.as_str());
+            godot_print!("Cookie set to TextEdit after load - length: {}", cookie_edit.get_text().len());
         } else {
             godot_error!("Weav3rSettingScene: CookieEdit node not found.");
         }
@@ -117,7 +117,7 @@ impl IControl for Weav3rSettingScene {
         } else {
             godot_error!("Weav3rSettingScene: SaveButton node not found.");
         }
-        if let Some(save_weav3r_token_btn) = &self.save_weav3r_token_btn {
+        if let Some(save_weav3r_token_btn) = &self.parse_weav3r_curl_btn {
             let save_weav3r_token_btn = save_weav3r_token_btn.clone();
             save_weav3r_token_btn
                 .signals()
@@ -163,10 +163,6 @@ impl Weav3rSettingScene {
             let min_profit = min_profit_edit.get_value().round() as i64;
             setting_data.set_min_profit(min_profit);
         }
-        if let Some(token_edit) = &self.token_edit {
-            let token = token_edit.get_text().strip_edges(true, true);
-            setting_data.set_next_action(&token.to_string());
-        }
         if let Some(filter_id_edit) = &self.filter_id_edit {
             let filter_id = filter_id_edit.get_text().strip_edges(true, true);
             setting_data.set_filter_ids(&filter_id.to_string());
@@ -179,6 +175,15 @@ impl Weav3rSettingScene {
             let office_sell_profit = office_sell_profit_edit.get_value() as u64;
             setting_data.set_office_sell_profit(office_sell_profit);
         }
+        if let Some(token_edit) = &self.token_edit {
+            let token = token_edit.get_text().strip_edges(true, true);
+            setting_data.set_next_action(&token.to_string());
+        }
+        if let Some(cookie_edit) = &self.cookie_edit {
+            let cookie = cookie_edit.get_text().strip_edges(true, true);
+            godot_print!("Cookie to save from TextEdit - length: {}", cookie.len());
+            setting_data.set_cookie(&cookie.to_string());
+        }
 
         if let Err(err) = setting_data.save() {
             godot_error!(
@@ -186,18 +191,17 @@ impl Weav3rSettingScene {
                 Weav3rSettingData::SETTINGS_PATH,
                 err
             );
+        } else {
+            godot_print!("Weav3rSettingScene: Saved successfully");
         }
     }
 
     #[func]
     pub fn on_save_weav3r_token_pressed(&mut self) {
-        let Some(curl_edit) = &self.curl_edit else {
-            godot_error!("Weav3rSettingScene: CurlEdit node not found.");
-            return;
-        };
-        let text = curl_edit.get_text();
+        let display_server = DisplayServer::singleton();
+        let text = display_server.clipboard_get();
         if text.is_empty() {
-            godot_warn!("Weav3rSettingScene: CurlEdit is empty.");
+            godot_warn!("Weav3rSettingScene: Clipboard is empty.");
             return;
         }
         let token = tools::http::HttpTool::from_curl(&text.to_string());
@@ -216,7 +220,7 @@ impl Weav3rSettingScene {
             return;
         }
 
-        let Some(cookie) = ht.headers.get("Cookie").cloned() else {
+        let Some(cookie) = ht.headers.get("cookie").cloned() else {
             godot_warn!("Weav3rSettingScene: Failed to get cookie from curl.");
             return;
         };
@@ -226,12 +230,14 @@ impl Weav3rSettingScene {
             return;
         }
 
+        godot_print!("Cookie from curl - length: {}", cookie.len());
+
         if let Some(token_edit) = self.token_edit.as_mut() {
             token_edit.set_text(next_action.as_str());
         }
         if let Some(cookie_edit) = self.cookie_edit.as_mut() {
             cookie_edit.set_text(cookie.as_str());
-            godot_print!("cookie: {:?}", cookie);
+            godot_print!("Cookie set to TextEdit - length: {}", cookie_edit.get_text().len());
         }
     }
 }

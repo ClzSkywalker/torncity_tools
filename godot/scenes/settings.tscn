@@ -161,25 +161,14 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
+wrap_mode = 1
+autowrap_mode = 1
 
-[node name="CurlVBox" type="VBoxContainer" parent="Container/ScrollContainer/TopBar" unique_id=527446569]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Container/ScrollContainer/TopBar/CurlVBox" unique_id=2016404188]
-layout_mode = 2
-text = "Weav3r Curl:"
-
-[node name="CurlEdit" type="TextEdit" parent="Container/ScrollContainer/TopBar/CurlVBox" unique_id=871559334]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-scroll_smooth = true
-
-[node name="SaveWeav3rTokenBtn" type="Button" parent="Container/ScrollContainer/TopBar/CurlVBox" unique_id=121005520]
+[node name="ParseWeav3rCurlBtna" type="Button" parent="Container/ScrollContainer/TopBar" unique_id=569015558]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
-text = "Save weav3r token"
+text = "Parse clipboard curl"
 
 [node name="SaveButton" type="Button" parent="Container/ScrollContainer/TopBar" unique_id=1183874491]
 unique_name_in_owner = true

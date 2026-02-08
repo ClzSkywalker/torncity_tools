@@ -146,13 +146,14 @@ impl Weav3rScene {
             .join(",");
 
         let next_action = setting_data.get_next_action();
+        let cookie = setting_data.get_cookie();
 
         let Some(http) = self.http_request.as_mut() else {
             godot_error!("Weav3rScene: HTTPRequest node not found.");
             return;
         };
         http.bind_mut()
-            .send_request(GString::from(&target_ids), next_action);
+            .send_request(GString::from(&target_ids), next_action, cookie);
     }
 
     #[func]

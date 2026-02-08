@@ -83,12 +83,12 @@ impl std::fmt::Debug for HttpTool {
             format!("<binary data, {} bytes>", self.body.len())
         };
 
-        write!(f, "HttpTool {{\n")?;
-        write!(f, "  params: {:?},\n", self.params)?;
-        write!(f, "  headers: {:?},\n", self.headers)?;
-        write!(f, "  body: {},\n", body_str)?;
-        write!(f, "  method: {:?},\n", self.method)?;
-        write!(f, "  url: {:?}\n", self.url)?;
+        writeln!(f, "HttpTool {{")?;
+        writeln!(f, "  params: {:?},", self.params)?;
+        writeln!(f, "  headers: {:?},", self.headers)?;
+        writeln!(f, "  body: {},", body_str)?;
+        writeln!(f, "  method: {:?},", self.method)?;
+        writeln!(f, "  url: {:?}", self.url)?;
         write!(f, "}}")
     }
 }
@@ -158,7 +158,7 @@ impl HttpTool {
                 "-H" | "--header" => {
                     if i + 1 < tokens.len() {
                         if let Some((key, value)) = parse_header(&tokens[i + 1]) {
-                            headers.insert(key, value);
+                            headers.insert(key.to_lowercase(), value);
                         }
                         i += 1;
                     }
@@ -180,25 +180,25 @@ impl HttpTool {
                         let auth = &tokens[i + 1];
                         let auth_header = format!("Authorization: Basic {}", base64_encode(auth));
                         if let Some((key, value)) = parse_header(&auth_header) {
-                            headers.insert(key, value);
+                            headers.insert(key.to_lowercase(), value);
                         }
                         i += 1;
                     }
                 }
                 "-A" | "--user-agent" => {
                     if i + 1 < tokens.len() {
-                        headers.insert("User-Agent".to_string(), tokens[i + 1].clone());
+                        headers.insert("user-agent".to_string(), tokens[i + 1].clone());
                         i += 1;
                     }
                 }
                 "-b" | "--cookie" => {
                     if i + 1 < tokens.len() {
-                        headers.insert("Cookie".to_string(), tokens[i + 1].clone());
+                        headers.insert("cookie".to_string(), tokens[i + 1].clone());
                         i += 1;
                     }
                 }
                 "--compressed" => {
-                    headers.insert("Accept-Encoding".to_string(), "gzip, deflate".to_string());
+                    headers.insert("accept-encoding".to_string(), "gzip, deflate".to_string());
                 }
                 "-k" | "--insecure" => {}
                 "-s" | "--silent" | "-v" | "--verbose" | "-i" | "--include" | "-L"
@@ -217,7 +217,7 @@ impl HttpTool {
                                 'H' => {
                                     if i + 1 < tokens.len() {
                                         if let Some((key, value)) = parse_header(&tokens[i + 1]) {
-                                            headers.insert(key, value);
+                                            headers.insert(key.to_lowercase(), value);
                                         }
                                         i += 1;
                                     }
@@ -241,7 +241,7 @@ impl HttpTool {
         }
 
         if let Some(url_str) = url {
-            tool.url = url_str;
+            tool.url = url_str.trim().trim_matches('`').to_string();
         } else {
             return Err("URL not found in curl command".to_string());
         }
@@ -316,7 +316,7 @@ fn tokenize_curl(curl_command: &str) -> Vec<String> {
         }
 
         match ch {
-            '\\' if in_double_quote || in_single_quote => {
+            '\\' if in_double_quote => {
                 escape_next = true;
             }
             '\'' if !in_double_quote => {
@@ -347,7 +347,9 @@ fn tokenize_curl(curl_command: &str) -> Vec<String> {
 fn parse_header(header: &str) -> Option<(String, String)> {
     let parts: Vec<&str> = header.splitn(2, ':').collect();
     if parts.len() == 2 {
-        Some((parts[0].trim().to_string(), parts[1].trim().to_string()))
+        let key = parts[0].trim().to_string();
+        let value = parts[1].trim().trim_matches('`').to_string();
+        Some((key, value))
     } else {
         None
     }
@@ -401,17 +403,25 @@ mod http_test {
 
     #[test]
     fn test_curl() {
-        let curl_command = r#"curl -X POST 'https://weav3r.dev/favorites' -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36 Edg/144.0.0.0' -H 'Accept: text/x-component' -H 'accept-language: en' -H 'content-type: text/plain;charset=UTF-8' -H 'dnt: 1' -H 'next-action: 40b56cda62a77de9e1724496c1e9fdea42e89ab88a' -H 'Cookie: __tf_verified=1770523246123.d9523b2d4ad89d39d12ffb5149f3f389c07d041a96110aaa958c6e1ceed6cd32; _ga=GA1.1.302505827.1770436850; cf_clearance=w.lAzd_L1NsCH.uSgBVOHmVFGk_gzv90AGKBgEP5NBA-1770436848-1.2.1.1-9inhhxy4h4GnLkeLOJhKCkGtZJMXwTNm6eu0pRfZfPzB3jFInbUZSwZDQFgvmqcspU5Lzp7wxcrag8tDeQbTzw1jNM7TLs.EC7sdEXcLQEbfcuESOG5lotPBIys94zlsqIf8h5IaYYanXWGAH1eM6EQPEVUzS.zetr0EKsiqOprrLJMZZ9C5zFKVJPmlmS1yPzDGpoQf532zhcJX4BUTmuAB10WCmJmlxT_qG9eZ7E4; _ga_PF693NSPW1=GS2.1.s1770436850$o1$g1$t1770436880$j30$l0$h0' -d '[
-    [
-        385,
-        183
-    ]
-]'"#;
+        let curl_command = r#"curl --request POST 'https://weav3r.dev/favorites' --header 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36 Edg/144.0.0.0' --header 'Accept: text/x-component' --header 'accept-language: en' --header 'content-type: text/plain;charset=UTF-8' --header 'dnt: 1' --header 'next-action: 40b56cda62a77de9e1724496c1e9fdea42e89ab88a' --header 'next-router-state-tree: %5B%22%22%2C%7B%22children%22%3A%5B%22favorites%22%2C%7B%22children%22%3A%5B%22__PAGE__%22%2C%7B%7D%2Cnull%2Cnull%5D%7D%2Cnull%2Cnull%5D%7D%2Cnull%2Cnull%2Ctrue%5D' --header 'origin: https://weav3r.dev' --header 'priority: u=1, i' --header 'referer: https://weav3r.dev/favorites' --header 'sec-ch-ua: "Not(A:Brand";v="8", "Chromium";v="144", "Microsoft Edge";v="144"' --header 'sec-ch-ua-mobile: ?0' --header 'sec-ch-ua-platform: "Windows"' --header 'sec-fetch-dest: empty' --header 'sec-fetch-mode: cors' --header 'sec-fetch-site: same-origin' --header 'Cookie: __tf_verified=1770611010478.e74392adabbaf29579a9e4f62881c8e478c12fc35d286bd365b5a1ff8b5a8f3a; _ga=GA1.1.513731005.1770524621; cf_clearance=OZlKaHRTcyP1STPGJGSOv2As0_ojXe_Zs0yqOyJgVI0-1770524621-1.2.1.1-qbGhAh1vXpKnYedj03Ouv1UylV6Hwhd0IWvzbngnef5CUJaKZcw480VZFwhs6rpZrR0MPfycUDwD.VZuMzli1LGRcp.1JcQDGYEE_S3JuFp_ifx79H3ETkpsTHJVoKCNAmBsnm9xwmMDFKmGMrR0mV1adeCf2a58P9uXwgvN6b1CAVLKmH4p8yr7ASpnH9D1Qbc23MXTtAuYYJwGi5QV.Xe8BhlR0T.Bj7J7dpxJK9A; _ga_PF693NSPW1=GS2.1.s1770524620$o1$g1$t1770524626$j54$l0$h0' --data '[[206]]'"#;
         let tool = HttpTool::from_curl(curl_command);
         assert!(tool.is_ok());
         let tool = tool.unwrap();
         println!("tool info:{:?}", tool);
         assert_eq!(tool.method, HttpMethod::POST);
         assert_eq!(tool.url, "https://weav3r.dev/favorites");
+        println!("next-action: {:?}", tool.headers.get("next-action"));
+        println!("cookie: {:?}", tool.headers.get("cookie"));
+    }
+
+    #[test]
+    fn test_curl_with_backticks() {
+        let curl_command = r#"curl --request POST ' `https://weav3r.dev/favorites` ' --header 'origin: `https://weav3r.dev` ' --header 'Cookie: test=value' --data '[[206]]'"#;
+        let tool = HttpTool::from_curl(curl_command);
+        assert!(tool.is_ok());
+        let tool = tool.unwrap();
+        assert_eq!(tool.url, "https://weav3r.dev/favorites");
+        assert_eq!(tool.headers.get("origin"), Some(&"https://weav3r.dev".to_string()));
+        assert_eq!(tool.headers.get("cookie"), Some(&"test=value".to_string()));
     }
 }

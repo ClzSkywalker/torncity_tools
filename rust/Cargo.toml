@@ -36,4 +36,4 @@ opt-level = 0  # 禁用优化，确保调试器能准确显示变量
 split-debuginfo = "unpacked"  # 改善调试器性能
 
 [profile.release]
-debug = 1       # 生成部分调试信息（如行号）
+# debug = 1       # 生成部分调试信息（如行号）
