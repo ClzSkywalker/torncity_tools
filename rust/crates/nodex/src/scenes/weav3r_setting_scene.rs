@@ -1,5 +1,5 @@
 use godot::{
-    classes::{Button, Control, DisplayServer, IControl, SpinBox, TextEdit},
+    classes::{Button, CheckButton, Control, DisplayServer, IControl, SpinBox, TextEdit},
     prelude::*,
 };
 use tools::{
@@ -15,6 +15,8 @@ pub struct Weav3rSettingScene {
     base: Base<Control>,
     // @onready var 对应的字段
     interval_edit: Option<Gd<SpinBox>>,
+    light_sec_edit: Option<Gd<SpinBox>>,        // 高亮秒时间
+    audio_switch_btn: Option<Gd<CheckButton>>, // 音频开关
     profit_percent_edit: Option<Gd<SpinBox>>,
     min_profit_edit: Option<Gd<SpinBox>>,
     filter_id_edit: Option<Gd<TextEdit>>,
@@ -31,6 +33,8 @@ impl IControl for Weav3rSettingScene {
     fn ready(&mut self) {
         // 在 ready 中初始化 @onready 变量，类似 GDScript 的 @onready var
         self.interval_edit = self.get_node_as::<SpinBox>("%IntervalEdit");
+        self.light_sec_edit = self.get_node_as::<SpinBox>("%LightSecEdit");
+        self.audio_switch_btn = self.get_node_as::<CheckButton>("%AudioSwitchBtn");
         self.profit_percent_edit = self.get_node_as::<SpinBox>("%ProfitPercentEdit");
         self.min_profit_edit = self.get_node_as::<SpinBox>("%MinProfitEdit");
         self.filter_id_edit = self.get_node_as::<TextEdit>("%FilterIdEdit");
@@ -56,12 +60,23 @@ impl IControl for Weav3rSettingScene {
 
         let setting_data = Weav3rSettingData::new(cfg);
 
-        // 检查节点是否都找到了
         if let Some(interval_edit) = self.interval_edit.as_mut() {
             let interval = setting_data.get_interval();
             interval_edit.set_value(interval);
         } else {
             godot_error!("Weav3rSettingScene: IntervalEdit node not found.");
+        }
+        if let Some(light_sec_edit) = self.light_sec_edit.as_mut() {
+            let light_sec = setting_data.get_light_sec();
+            light_sec_edit.set_value(light_sec as f64);
+        } else {
+            godot_error!("Weav3rSettingScene: LightSecEdit node not found.");
+        }
+        if let Some(audio_switch_edit) = self.audio_switch_btn.as_mut() {
+            let audio_switch = setting_data.get_audio_switch();
+            audio_switch_edit.set_pressed(audio_switch);
+        } else {
+            godot_error!("Weav3rSettingScene: AudioSwitchEdit node not found.");
         }
         if let Some(profit_percent_edit) = self.profit_percent_edit.as_mut() {
             let profit_percent = setting_data.get_profit_percent();
@@ -101,9 +116,7 @@ impl IControl for Weav3rSettingScene {
         }
         if let Some(cookie_edit) = self.cookie_edit.as_mut() {
             let cookie = setting_data.get_cookie();
-            godot_print!("Cookie loaded from config - length: {}", cookie.len());
             cookie_edit.set_text(cookie.as_str());
-            godot_print!("Cookie set to TextEdit after load - length: {}", cookie_edit.get_text().len());
         } else {
             godot_error!("Weav3rSettingScene: CookieEdit node not found.");
         }
@@ -155,6 +168,14 @@ impl Weav3rSettingScene {
             let interval = interval_edit.get_value();
             setting_data.set_interval(interval);
         }
+        if let Some(light_sec_edit) = &self.light_sec_edit {
+            let light_sec = light_sec_edit.get_value().round() as u64;
+            setting_data.set_light_sec(light_sec);
+        }
+        if let Some(audio_switch_edit) = &self.audio_switch_btn {
+            let audio_switch = audio_switch_edit.is_pressed();
+            setting_data.set_audio_switch(audio_switch);
+        }
         if let Some(profit_percent_edit) = &self.profit_percent_edit {
             let profit_percent = profit_percent_edit.get_value() as f32;
             setting_data.set_profit_percent(profit_percent);
@@ -181,7 +202,6 @@ impl Weav3rSettingScene {
         }
         if let Some(cookie_edit) = &self.cookie_edit {
             let cookie = cookie_edit.get_text().strip_edges(true, true);
-            godot_print!("Cookie to save from TextEdit - length: {}", cookie.len());
             setting_data.set_cookie(&cookie.to_string());
         }
 
@@ -229,15 +249,11 @@ impl Weav3rSettingScene {
             godot_warn!("Weav3rSettingScene: cookie is empty.");
             return;
         }
-
-        godot_print!("Cookie from curl - length: {}", cookie.len());
-
         if let Some(token_edit) = self.token_edit.as_mut() {
             token_edit.set_text(next_action.as_str());
         }
         if let Some(cookie_edit) = self.cookie_edit.as_mut() {
             cookie_edit.set_text(cookie.as_str());
-            godot_print!("Cookie set to TextEdit - length: {}", cookie_edit.get_text().len());
         }
     }
 }

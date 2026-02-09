@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use godot::global::{godot_error};
+use godot::global::godot_error;
 use model::{items::ItemInfo, weav3r::favorites::ProductionItem};
 use tools::order_change::{ContentHash, ContentHashable, hash::StableHasher};
 
@@ -303,6 +303,9 @@ impl ProfitInfo {
         cp.market_profit = cp.market_profit.single_value(self.quantity);
         cp.avg_bazaar_profit = cp.avg_bazaar_profit.single_value(self.quantity);
         cp.final_profit = cp.final_profit.single_value(self.quantity);
+        if let Some(office) = cp.office_profit {
+            cp.office_profit = Some(office.single_value(self.quantity));
+        }
         cp
     }
 
@@ -312,22 +315,32 @@ impl ProfitInfo {
             godot_error!("ProfitInfo id not equal:{}:{}", self.id, data.id);
             return self.clone();
         }
+        let quantity_a = self.quantity;
+        let quantity_b = data.quantity;
         let total_quantity = self.quantity + data.quantity;
         let e = data.single_value();
-        let mut res = self.clone();
+        let mut res = self.clone().single_value();
 
         res.market_profit = res.market_profit.combine(e.market_profit);
         res.avg_bazaar_profit = res.avg_bazaar_profit.combine(e.avg_bazaar_profit);
         res.final_profit = res.final_profit.combine(e.final_profit);
+        if let Some(office_a) = res.office_profit.clone() {
+            if let Some(office_b) = e.office_profit.clone() {
+                res.office_profit = Some(office_a.combine(office_b));
+            }
+        }
 
         res.market_profit = res.market_profit.build(total_quantity);
         res.avg_bazaar_profit = res.avg_bazaar_profit.build(total_quantity);
         res.final_profit = res.final_profit.build(total_quantity);
+        res.office_profit = res
+            .office_profit
+            .map(|item| item.build(total_quantity));
 
         res.quantity = total_quantity;
-        res.single_recyle_price = (res.single_recyle_price * self.quantity as u64
-            + data.single_recyle_price * data.quantity as u64)
-            / (self.quantity as u64 + data.quantity as u64);
+        res.single_recyle_price = (res.single_recyle_price * quantity_a as u64
+            + e.single_recyle_price * quantity_b as u64)
+            / (quantity_a as u64 + quantity_b as u64);
         res
     }
 }
@@ -369,7 +382,7 @@ impl ProfitMetrics {
             total_profit_value: (self.total_profit_value + data.total_profit_value) / 2,
             single_sell_price: (self.single_sell_price + data.single_sell_price) / 2,
             total_sell_price: (self.total_sell_price + data.total_sell_price) / 2,
-            is_office: self.is_office,
+            is_office: self.is_office || data.is_office,
         }
     }
 

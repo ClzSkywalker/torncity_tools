@@ -5,6 +5,7 @@ pub struct ChangeSummary {
     pub total_items: usize,
     pub added_count: usize,
     pub removed_count: usize,
+    pub content_changed_count: usize,
     pub order_changed_count: usize,
     pub unchanged_count: usize,
     pub change_type: OverallChangeType,
@@ -27,6 +28,7 @@ impl<T: ContentHashable + PartialEq + Clone> OrderChangeDetector<T> {
                     total_items: self.new_data.len(),
                     added_count: 0,
                     removed_count: 0,
+                    content_changed_count: 0,
                     order_changed_count: 0,
                     unchanged_count: 0,
                     change_type: OverallChangeType::ContentOnly,
@@ -36,10 +38,11 @@ impl<T: ContentHashable + PartialEq + Clone> OrderChangeDetector<T> {
 
         let change_type = if report.added_count == 0
             && report.removed_count == 0
+            && report.content_changed_count == 0
             && report.order_changed_count == 0
         {
             OverallChangeType::NoChange
-        } else if report.added_count == 0 && report.removed_count == 0 {
+        } else if report.added_count == 0 && report.removed_count == 0 && report.content_changed_count == 0 {
             OverallChangeType::OrderOnly
         } else if report.order_changed_count == 0 {
             OverallChangeType::ContentOnly
@@ -51,6 +54,7 @@ impl<T: ContentHashable + PartialEq + Clone> OrderChangeDetector<T> {
             total_items: report.items.len(),
             added_count: report.added_count,
             removed_count: report.removed_count,
+            content_changed_count: report.content_changed_count,
             order_changed_count: report.order_changed_count,
             unchanged_count: report.unchanged_count,
             change_type,

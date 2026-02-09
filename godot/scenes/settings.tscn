@@ -41,6 +41,22 @@ size_flags_horizontal = 10
 value = 5.0
 rounded = true
 
+[node name="LightSecVBox" type="HBoxContainer" parent="Container/ScrollContainer/TopBar" unique_id=360320576]
+layout_mode = 2
+
+[node name="IntervalLabel" type="Label" parent="Container/ScrollContainer/TopBar/LightSecVBox" unique_id=503845506]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Light Sec(s): "
+
+[node name="LightSecEdit" type="SpinBox" parent="Container/ScrollContainer/TopBar/LightSecVBox" unique_id=1732787557]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+max_value = 5000.0
+value = 30.0
+rounded = true
+
 [node name="AudioVBox" type="HBoxContainer" parent="Container/ScrollContainer/TopBar" unique_id=1213435087]
 layout_mode = 2
 
@@ -49,7 +65,8 @@ layout_mode = 2
 size_flags_horizontal = 2
 text = "Audio:"
 
-[node name="CheckButton" type="CheckButton" parent="Container/ScrollContainer/TopBar/AudioVBox" unique_id=474081469]
+[node name="AudioSwitchBtn" type="CheckButton" parent="Container/ScrollContainer/TopBar/AudioVBox" unique_id=474081469]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 10
 button_pressed = true

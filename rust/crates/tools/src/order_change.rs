@@ -102,14 +102,23 @@ impl<T: ContentHashable + PartialEq + Clone> OrderChangeDetector<T> {
 
         let mut order_changed_items: Vec<OrderChangeItem<T>> = Vec::new();
         let mut unchanged_items: Vec<OrderChangeItem<T>> = Vec::new();
+        let mut content_changed_items: Vec<OrderChangeItem<T>> = Vec::new();
 
         for (new_idx, new_item) in self.new_data.iter().enumerate() {
             let new_hash = new_item.content_hash();
 
             if common_hashes.contains(&new_hash) {
                 let old_idx = old_positions[&new_hash];
+                let old_item = &self.old_data[old_idx];
 
-                if old_idx != new_idx {
+                if new_item != old_item {
+                    content_changed_items.push(OrderChangeItem {
+                        item: new_item.clone(),
+                        old_position: Some(old_idx),
+                        new_position: Some(new_idx),
+                        change_type: ChangeType::ContentChanged,
+                    });
+                } else if old_idx != new_idx {
                     order_changed_items.push(OrderChangeItem {
                         item: new_item.clone(),
                         old_position: Some(old_idx),
@@ -153,10 +162,13 @@ impl<T: ContentHashable + PartialEq + Clone> OrderChangeDetector<T> {
 
         let order_changed_count = order_changed_items.len();
         let unchanged_count = unchanged_items.len();
+        let content_changed_count = content_changed_items.len();
 
         report.order_changed_count = order_changed_count;
         report.unchanged_count = unchanged_count;
+        report.content_changed_count = content_changed_count;
 
+        report.items.extend(content_changed_items);
         report.items.extend(order_changed_items);
         report.items.extend(unchanged_items);
 
@@ -171,6 +183,7 @@ impl<T: ContentHashable + PartialEq + Clone> OrderChangeDetector<T> {
 
         report.has_changes = report.added_count > 0
             || report.removed_count > 0
+            || report.content_changed_count > 0
             || report.order_changed_count > 0;
 
         if let Some(start) = start_time {

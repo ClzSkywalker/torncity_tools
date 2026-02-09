@@ -5,6 +5,7 @@ pub struct OrderChangeReport<T> {
     pub items: Vec<OrderChangeItem<T>>,
     pub added_count: usize,
     pub removed_count: usize,
+    pub content_changed_count: usize,
     pub order_changed_count: usize,
     pub unchanged_count: usize,
     pub has_changes: bool,
@@ -17,6 +18,7 @@ impl<T> Default for OrderChangeReport<T> {
             items: Vec::new(),
             added_count: 0,
             removed_count: 0,
+            content_changed_count: 0,
             order_changed_count: 0,
             unchanged_count: 0,
             has_changes: false,
@@ -42,6 +44,13 @@ impl<T: ContentHashable> OrderChangeReport<T> {
             .collect()
     }
 
+    pub fn get_content_changed_items(&self) -> Vec<&OrderChangeItem<T>> {
+        self.items
+            .iter()
+            .filter(|x| x.change_type == ChangeType::ContentChanged)
+            .collect()
+    }
+
     pub fn get_order_changed_items(&self) -> Vec<&OrderChangeItem<T>> {
         self.items
             .iter()
@@ -64,18 +73,19 @@ impl<T: ContentHashable> OrderChangeReport<T> {
     }
 
     pub fn has_only_content_changes(&self) -> bool {
-        self.added_count > 0 || self.removed_count > 0
+        self.added_count > 0 || self.removed_count > 0 || self.content_changed_count > 0
     }
 
     pub fn has_mixed_changes(&self) -> bool {
-        (self.added_count > 0 || self.removed_count > 0) && self.order_changed_count > 0
+        (self.added_count > 0 || self.removed_count > 0 || self.content_changed_count > 0) && self.order_changed_count > 0
     }
 
     pub fn summary(&self) -> String {
         format!(
-            "OrderChangeReport: added={}, removed={}, order_changed={}, unchanged={}, has_changes={}, detection_time_us={}",
+            "OrderChangeReport: added={}, removed={}, content_changed={}, order_changed={}, unchanged={}, has_changes={}, detection_time_us={}",
             self.added_count,
             self.removed_count,
+            self.content_changed_count,
             self.order_changed_count,
             self.unchanged_count,
             self.has_changes,

@@ -53,8 +53,10 @@ impl IPanelContainer for ImageHttpRequest {
         }
         if let Some(texture) = load_image_texture_from_disk(self.url.to_string().as_str()) {
             icon.set_texture(Some(&texture));
+            godot_print!("ImageHttpRequest: loaded: {}", self.url);
             return;
         }
+        godot_print!("ImageHttpRequest: request: {}", self.url);
         let err = request.request(self.url.to_string().as_str());
         if err != global::Error::OK {
             godot_error!(
@@ -77,17 +79,26 @@ impl ImageHttpRequest {
     #[func]
     pub fn set_url_request(&mut self, url: GString) {
         self.url = url.clone();
-        if let Some(request) = self.icon_request.as_mut() {
-            let e = request.request(url.to_string().as_str());
-            if e != global::Error::OK {
-                godot_error!(
-                    "ImageHttpRequest: Icon request failed: {:?}, url: {}",
-                    e,
-                    url
-                );
-            }
-        } else {
+
+        let Some(icon) = self.icon.as_mut() else {
+            return;
+        };
+
+        if let Some(texture) = load_image_texture_from_disk(self.url.to_string().as_str()) {
+            icon.set_texture(Some(&texture));
+            return;
+        }
+        let Some(request) = self.icon_request.as_mut() else {
             godot_error!("ImageHttpRequest: Icon request node not found.");
+            return;
+        };
+        let err = request.request(self.url.to_string().as_str());
+        if err != global::Error::OK {
+            godot_error!(
+                "ImageHttpRequest: Icon request failed: {:?}, url: {}",
+                err,
+                self.url
+            );
         }
     }
 

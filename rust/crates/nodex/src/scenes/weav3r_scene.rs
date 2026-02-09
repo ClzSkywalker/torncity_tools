@@ -173,6 +173,7 @@ impl Weav3rScene {
                 response_code,
                 String::from_utf8_lossy(body.as_slice()).to_string()
             );
+            self.on_timer_controller_pressed();
             return;
         }
 
@@ -232,6 +233,7 @@ impl Weav3rScene {
         self.favorites_res.filter.min_profit_percentage = setting_data.get_profit_percent();
         self.favorites_res.filter.office_sell_price = setting_data.get_office_sell_price();
         self.favorites_res.filter.office_sell_profit = setting_data.get_office_sell_profit();
+        self.favorites_res.sort.recent_sec = setting_data.get_light_sec();
 
         let favorites_response = match FavoritesResponse::from_text(&response_text) {
             Ok(r) => r,

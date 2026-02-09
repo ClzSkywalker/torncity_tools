@@ -32,22 +32,17 @@ impl Weav3rHttpRequest {
         }
 
         if target_ids.is_empty() {
-            godot_error!("Weav3rHttpRequest: target_ids is empty.");
+            godot_warn!("Weav3rHttpRequest: target_ids is empty.");
             return;
         }
         if next_action.is_empty() {
-            godot_error!("Weav3rHttpRequest: next_action is empty.");
+            godot_warn!("Weav3rHttpRequest: next_action is empty.");
             return;
         }
         if cookie.is_empty() {
-            godot_error!("Weav3rHttpRequest: cookie is empty.");
+            godot_warn!("Weav3rHttpRequest: cookie is empty.");
             return;
         }
-
-        godot_print!("target_ids: {}", target_ids);
-        godot_print!("next_action: {}", next_action);
-        godot_print!("cookie length: {}", cookie.len());
-        godot_print!("cookie: {}", cookie);
 
         self.start_time = Some(Instant::now());
 
@@ -63,7 +58,6 @@ impl Weav3rHttpRequest {
         http.add_header("Next-Action", next_action.as_str());
         http.add_header("Cookie", cookie.as_str());
         http.set_body(format!("[[{}]]", target_ids).as_bytes().to_vec());
-        // godot_print!("Weav3rHttpRequest: Sending request with body: {}", target_ids);
         let request_result = http.send_request(&mut self.base_mut());
         if let Err(err) = request_result {
             godot_error!("Weav3rHttpRequest failed: {:?}", err);

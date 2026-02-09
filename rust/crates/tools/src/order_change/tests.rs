@@ -32,6 +32,7 @@ fn test_no_change() {
     assert!(!report.has_changes);
     assert_eq!(report.added_count, 0);
     assert_eq!(report.removed_count, 0);
+    assert_eq!(report.content_changed_count, 0);
     assert_eq!(report.order_changed_count, 0);
     assert_eq!(report.unchanged_count, 3);
 }
@@ -82,6 +83,50 @@ fn test_content_only_changed() {
     assert!(report.has_changes);
     assert_eq!(report.added_count, 1);
     assert_eq!(report.removed_count, 0);
+}
+
+#[test]
+fn test_content_changed_same_position() {
+    #[derive(Debug, Clone, PartialEq)]
+    struct ContentChangeTestItem {
+        id: i32,
+        name: String,
+    }
+
+    impl ContentHashable for ContentChangeTestItem {
+        fn content_hash(&self) -> ContentHash {
+            let mut hasher = super::hash::StableHasher::new();
+            hasher.write_i32(self.id);
+            hasher.finish()
+        }
+    }
+
+    let old_items = vec![
+        ContentChangeTestItem { id: 1, name: "OldA".to_string() },
+        ContentChangeTestItem { id: 2, name: "OldB".to_string() },
+        ContentChangeTestItem { id: 3, name: "OldC".to_string() },
+    ];
+
+    let new_items = vec![
+        ContentChangeTestItem { id: 1, name: "OldA".to_string() },
+        ContentChangeTestItem { id: 2, name: "NewB".to_string() },
+        ContentChangeTestItem { id: 3, name: "OldC".to_string() },
+    ];
+
+    let detector = OrderChangeDetector::new(old_items, new_items);
+    let report = detector.detect().unwrap();
+
+    assert!(report.has_changes);
+    assert_eq!(report.added_count, 0);
+    assert_eq!(report.removed_count, 0);
+    assert_eq!(report.content_changed_count, 1);
+    assert_eq!(report.order_changed_count, 0);
+    assert_eq!(report.unchanged_count, 2);
+
+    let content_changed = report.get_content_changed_items();
+    assert_eq!(content_changed.len(), 1);
+    assert_eq!(content_changed[0].item.id, 2);
+    assert_eq!(content_changed[0].item.name, "NewB");
 }
 
 #[test]
@@ -246,4 +291,38 @@ fn test_hash_stability() {
     let hash2 = item.content_hash();
 
     assert_eq!(hash1, hash2, "Hash should be stable across multiple calls");
+}
+
+#[test]
+fn test_hash_collision_detection() {
+    #[derive(Debug, Clone, PartialEq)]
+    struct CollisionTestItem {
+        id: i32,
+        name: String,
+    }
+
+    impl ContentHashable for CollisionTestItem {
+        fn content_hash(&self) -> ContentHash {
+            let mut hasher = super::hash::StableHasher::new();
+            hasher.write_i32(self.id);
+            hasher.finish()
+        }
+    }
+
+    let old_items = vec![
+        CollisionTestItem { id: 1, name: "OldName".to_string() },
+    ];
+
+    let new_items = vec![
+        CollisionTestItem { id: 1, name: "NewName".to_string() },
+    ];
+
+    let detector = OrderChangeDetector::new(old_items, new_items);
+    let report = detector.detect().unwrap();
+
+    assert!(report.has_changes);
+    assert_eq!(report.added_count, 0);
+    assert_eq!(report.removed_count, 0);
+    assert_eq!(report.content_changed_count, 1);
+    assert_eq!(report.order_changed_count, 0);
 }

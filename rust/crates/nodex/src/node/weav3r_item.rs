@@ -8,6 +8,7 @@ use crate::node::prelude::*;
 #[class(init,base=PanelContainer)]
 pub struct Weav3rItem {
     pub item: ProfitUserInfo,
+    pub light_sec: u64,
     #[base]
     base: Base<PanelContainer>,
     user_name: Option<Gd<Label>>,
@@ -16,7 +17,8 @@ pub struct Weav3rItem {
     profit_vbox: Option<Gd<VBoxContainer>>,
     top_bar: Option<Gd<PanelContainer>>,
     stylebox: Option<Gd<StyleBoxFlat>>, // 缓存 stylebox
-    last_color_sec: u64,                // 缓存上次颜色对应的秒数
+    current_sec: u64,                   // 当前显示的秒数
+    color_timer: f64,                   // 颜色更新计时器
 }
 
 #[godot_api]
@@ -30,19 +32,19 @@ impl IPanelContainer for Weav3rItem {
         self.update_ui();
     }
 
-    fn process(&mut self, _: f64) {
-        if self.stylebox.is_none() {
+    fn process(&mut self, delta: f64) {
+        let actual_sec = tools::time::get_current_time() - self.item.created_on;
+        if actual_sec > self.light_sec {
+            if self.stylebox.is_some() {
+                self.rm_color();
+            }
             return;
         }
-        let sec = tools::time::get_current_time() - self.item.created_on;
-        if sec > 30 {
-            self.rm_color();
-            return;
-        }
-        // 只有秒数变化时才更新颜色，避免每帧都更新
-        if sec != self.last_color_sec {
-            self.last_color_sec = sec;
-            self.set_color(sec);
+        self.color_timer += delta;
+        if self.color_timer >= 1.0 {
+            self.color_timer = 0.0;
+            self.current_sec += 1;
+            self.set_color(self.current_sec);
         }
     }
 }
@@ -76,7 +78,8 @@ impl Weav3rItem {
         }
 
         let sec = tools::time::get_current_time() - self.item.created_on;
-        self.last_color_sec = sec;
+        self.current_sec = sec;
+        self.color_timer = 0.0;
         self.set_color(sec);
 
         let Some(vbox) = self.profit_vbox.as_mut() else {
@@ -107,7 +110,7 @@ impl Weav3rItem {
     }
 
     fn set_color(&mut self, sec: u64) {
-        if sec > 30 {
+        if sec > self.light_sec {
             return;
         }
 
