@@ -97,7 +97,7 @@ impl Weav3rItem {
             // 在非第一个元素前添加分隔线
             if i > 0 {
                 let separator = HSeparator::new_alloc();
-                vbox.add_child(Some(&separator.upcast::<Node>()));
+                vbox.add_child(&separator.upcast::<Node>());
             }
 
             let Some(mut profit_panel) = ProfitPanel::get_scene_instance() else {
@@ -105,7 +105,7 @@ impl Weav3rItem {
                 return;
             };
             profit_panel.bind_mut().set_item(item.clone());
-            vbox.add_child(Some(&profit_panel.upcast::<Node>()));
+            vbox.add_child(&profit_panel.upcast::<Node>());
         }
     }
 
@@ -121,7 +121,7 @@ impl Weav3rItem {
             // 首次设置时绑定到 top_bar
             if let (Some(top_bar), Some(stylebox)) = (self.top_bar.as_mut(), self.stylebox.as_ref())
             {
-                top_bar.add_theme_stylebox_override("panel", Some(stylebox));
+                top_bar.add_theme_stylebox_override("panel", stylebox);
             }
         }
 

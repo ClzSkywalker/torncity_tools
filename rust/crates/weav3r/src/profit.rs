@@ -324,18 +324,16 @@ impl ProfitInfo {
         res.market_profit = res.market_profit.combine(e.market_profit);
         res.avg_bazaar_profit = res.avg_bazaar_profit.combine(e.avg_bazaar_profit);
         res.final_profit = res.final_profit.combine(e.final_profit);
-        if let Some(office_a) = res.office_profit.clone() {
-            if let Some(office_b) = e.office_profit.clone() {
-                res.office_profit = Some(office_a.combine(office_b));
-            }
+        if let Some(office_a) = res.office_profit.clone()
+            && let Some(office_b) = e.office_profit.clone()
+        {
+            res.office_profit = Some(office_a.combine(office_b));
         }
 
         res.market_profit = res.market_profit.build(total_quantity);
         res.avg_bazaar_profit = res.avg_bazaar_profit.build(total_quantity);
         res.final_profit = res.final_profit.build(total_quantity);
-        res.office_profit = res
-            .office_profit
-            .map(|item| item.build(total_quantity));
+        res.office_profit = res.office_profit.map(|item| item.build(total_quantity));
 
         res.quantity = total_quantity;
         res.single_recyle_price = (res.single_recyle_price * quantity_a as u64

@@ -55,7 +55,7 @@ impl IPanelContainer for ProfitPanel {
         );
         // todo 这个 list 可以考虑干掉
         if let Some(vbox_profit_list) = self.vbox_profit_list.as_mut() {
-            vbox_profit_list.add_child(Some(&profit_item.upcast::<Node>()));
+            vbox_profit_list.add_child(&profit_item.upcast::<Node>());
         }
     }
 }

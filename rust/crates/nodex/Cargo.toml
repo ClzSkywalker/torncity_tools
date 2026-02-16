@@ -8,6 +8,7 @@ torn_logic.workspace = true
 weav3r.workspace = true
 tools.workspace = true
 model.workspace = true
+godot_toast.workspace = true
 
 godot.workspace = true
 serde.workspace = true

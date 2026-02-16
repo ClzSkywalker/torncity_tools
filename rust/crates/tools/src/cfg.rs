@@ -50,10 +50,10 @@ impl CfgTool {
         self.write_config(section, key, value)
     }
 
-    pub fn read_config_u64(&self, section: &str, key: &str, default: u64) -> u64 {
+    pub fn read_config_u16(&self, section: &str, key: &str, default: u16) -> u16 {
         self.read_config(section, key, default)
     }
-    pub fn write_config_u64(&mut self, section: &str, key: &str, value: u64) {
+    pub fn write_config_u16(&mut self, section: &str, key: &str, value: u16) {
         self.write_config(section, key, value)
     }
 

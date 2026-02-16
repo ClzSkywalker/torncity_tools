@@ -1,4 +1,5 @@
 use godot::{classes::*, prelude::*};
+use godot_toast::ToastPosition;
 use model::weav3r::favorites::FavoritesResponse;
 use tools::{
     base::eq_f64,
@@ -10,7 +11,10 @@ use weav3r::{
     profit::{FavoritesData, ProfitUserInfo},
 };
 
-use crate::prelude::{Weav3rHttpRequest, Weav3rItem};
+use crate::{
+    ToastConfig, get_toast_manager,
+    prelude::{Weav3rHttpRequest, Weav3rItem},
+};
 
 #[derive(GodotClass)]
 #[class(init,base=Control)]
@@ -126,7 +130,7 @@ impl Weav3rScene {
             return;
         }
 
-        let office_sell_price = setting_data.get_office_sell_price();
+        let office_sell_price = setting_data.get_office_sell_price() as u64;
 
         let f_target_ids = filter_id_text
             .split(',')
@@ -174,6 +178,7 @@ impl Weav3rScene {
                 String::from_utf8_lossy(body.as_slice()).to_string()
             );
             self.on_timer_controller_pressed();
+            self.toast("请求失败".to_string());
             return;
         }
 
@@ -231,9 +236,9 @@ impl Weav3rScene {
 
         self.favorites_res.filter.min_profit = setting_data.get_min_profit();
         self.favorites_res.filter.min_profit_percentage = setting_data.get_profit_percent();
-        self.favorites_res.filter.office_sell_price = setting_data.get_office_sell_price();
-        self.favorites_res.filter.office_sell_profit = setting_data.get_office_sell_profit();
-        self.favorites_res.sort.recent_sec = setting_data.get_light_sec();
+        self.favorites_res.filter.office_sell_price = setting_data.get_office_sell_price() as u64;
+        self.favorites_res.filter.office_sell_profit = setting_data.get_office_sell_profit() as u64;
+        self.favorites_res.sort.recent_sec = setting_data.get_light_sec() as u64;
 
         let favorites_response = match FavoritesResponse::from_text(&response_text) {
             Ok(r) => r,
@@ -422,6 +427,17 @@ impl Weav3rScene {
         if let Some(timer) = self.timer.as_mut() {
             timer.set_paused(false);
             godot_print!("Weav3rScene: Timer resumed");
+        }
+    }
+
+    #[func]
+    fn toast(&mut self, text: String) {
+        if let Some(mut toast_manager) = get_toast_manager() {
+            toast_manager
+                .bind_mut()
+                .show_with_config(ToastConfig::new(text).with_position(ToastPosition::TopCenter));
+        } else {
+            godot_print!("Weav3rScene: ToastManager not found");
         }
     }
 }

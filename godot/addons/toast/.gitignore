@@ -1,0 +1,14 @@
+# Rust build artifacts
+rust/target/
+rust/*.so
+rust/*.dll
+rust/*.dylib
+rust/Cargo.lock
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.tscn.backup
+*.tres.backup

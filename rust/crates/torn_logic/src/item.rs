@@ -14,7 +14,7 @@ static WEAPON_ITEM_INFO_MAP: OnceLock<HashMap<i32, ItemInfo>> = OnceLock::new();
 /// 获取物品列表
 pub fn get_item_list() -> &'static Vec<ItemInfo> {
     OFFICE_ITEM_INFO_LIST.get_or_init(|| {
-        let Some(file) = FileAccess::open("res://assets/data/torncity_items.csv", ModeFlags::READ)
+        let Some(mut file) = FileAccess::open("res://assets/data/torncity_items.csv", ModeFlags::READ)
         else {
             godot_error!("Failed to open torncity_items.csv");
             return Vec::new();

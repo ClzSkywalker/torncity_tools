@@ -169,7 +169,7 @@ impl Weav3rSettingScene {
             setting_data.set_interval(interval);
         }
         if let Some(light_sec_edit) = &self.light_sec_edit {
-            let light_sec = light_sec_edit.get_value().round() as u64;
+            let light_sec = light_sec_edit.get_value().round() as u16;
             setting_data.set_light_sec(light_sec);
         }
         if let Some(audio_switch_edit) = &self.audio_switch_btn {
@@ -185,23 +185,23 @@ impl Weav3rSettingScene {
             setting_data.set_min_profit(min_profit);
         }
         if let Some(filter_id_edit) = &self.filter_id_edit {
-            let filter_id = filter_id_edit.get_text().strip_edges(true, true);
+            let filter_id = filter_id_edit.get_text().strip_edges();
             setting_data.set_filter_ids(&filter_id.to_string());
         }
         if let Some(office_sell_price_edit) = &self.office_sell_price_edit {
-            let office_sell_price = office_sell_price_edit.get_value() as u64;
+            let office_sell_price = office_sell_price_edit.get_value().round() as i64;
             setting_data.set_office_sell_price(office_sell_price);
         }
         if let Some(office_sell_profit_edit) = &self.office_sell_profit_edit {
-            let office_sell_profit = office_sell_profit_edit.get_value() as u64;
+            let office_sell_profit = office_sell_profit_edit.get_value() as i64;
             setting_data.set_office_sell_profit(office_sell_profit);
         }
         if let Some(token_edit) = &self.token_edit {
-            let token = token_edit.get_text().strip_edges(true, true);
+            let token = token_edit.get_text().strip_edges();
             setting_data.set_next_action(&token.to_string());
         }
         if let Some(cookie_edit) = &self.cookie_edit {
-            let cookie = cookie_edit.get_text().strip_edges(true, true);
+            let cookie = cookie_edit.get_text().strip_edges();
             setting_data.set_cookie(&cookie.to_string());
         }
 

@@ -10,6 +10,7 @@ build:
 
 clippy:
 	cargo clippy -p $(RUST_CRATE) --manifest-path $(RUST_MANIFEST)
+	cargo clippy --manifest-path godot/addons/toast/rust/Cargo.toml
 
 # 后台运行 godot 的 LSP 服务
 godot-lsp:

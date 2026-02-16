@@ -358,7 +358,7 @@ generate_keystore() {
 
 # Android 需要使用 godot 0.4.2（0.4.3+ 有 Android 加载 bug）
 GODOT_ANDROID_VERSION="0.4.2"
-GODOT_DEFAULT_VERSION="0.4.5"
+GODOT_BACKUP_FILE="${RUST_MANIFEST}.godot_backup"
 
 switch_godot_version() {
     local version="$1"
@@ -368,14 +368,44 @@ switch_godot_version() {
     
     local os=$(detect_os)
     if [[ "$os" == "mac" ]]; then
-        sed -i '' "s/godot = \"[^\"]*\"/godot = \"$version\"/" "$cargo_toml"
+        sed -i '' "s/godot = \{ git = \"[^\"]*\", [^}]* \}/godot = \"$version\"/" "$cargo_toml"
     else
-        sed -i "s/godot = \"[^\"]*\"/godot = \"$version\"/" "$cargo_toml"
+        sed -i "s/godot = { git = \"[^\"]*\", [^}]* }/godot = \"$version\"/" "$cargo_toml"
     fi
+}
+
+backup_godot_version() {
+    local cargo_toml="${RUST_MANIFEST}"
+    log "备份原始 godot 配置..."
+    if [[ "$os" == "mac" ]]; then
+        grep "godot = " "$cargo_toml" > "$GODOT_BACKUP_FILE"
+    else
+        grep "godot = " "$cargo_toml" > "$GODOT_BACKUP_FILE"
+    fi
+}
+
+restore_godot_version() {
+    local cargo_toml="${RUST_MANIFEST}"
+    [[ ! -f "$GODOT_BACKUP_FILE" ]] && { log "警告: 备份文件不存在，跳过恢复"; return; }
+    
+    log "恢复原始 godot 配置..."
+    local original_line=$(cat "$GODOT_BACKUP_FILE")
+    local os=$(detect_os)
+    
+    if [[ "$os" == "mac" ]]; then
+        sed -i '' "s/godot = \"[^\"]*\"/$original_line/" "$cargo_toml"
+    else
+        sed -i "s/godot = \"[^\"]*\"/$original_line/" "$cargo_toml"
+    fi
+    
+    rm -f "$GODOT_BACKUP_FILE"
 }
 
 build_rust() {
     [[ "$SKIP_RUST_BUILD" == "1" ]] && { log "跳过 Rust 构建"; return; }
+    
+    # 备份原始配置
+    backup_godot_version
     
     # Android 使用 0.4.2 版本
     switch_godot_version "=$GODOT_ANDROID_VERSION"
@@ -383,8 +413,8 @@ build_rust() {
     log "构建 Rust (target: $ANDROID_TARGET, godot: $GODOT_ANDROID_VERSION)..."
     cargo build -p "$RUST_CRATE" --target="$ANDROID_TARGET" --release --manifest-path "$RUST_MANIFEST"
     
-    # 恢复默认版本
-    switch_godot_version "$GODOT_DEFAULT_VERSION"
+    # 恢复原始配置
+    restore_godot_version
 }
 
 # 检查 Rust 动态库是否存在

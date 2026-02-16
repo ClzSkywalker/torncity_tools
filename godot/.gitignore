@@ -1,4 +1,4 @@
-addons/*
+addons/rust_tools/*
 .godot/
 *.uid
 *.tmp

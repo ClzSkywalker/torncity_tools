@@ -16,9 +16,10 @@ nodex = { path = "crates/nodex" }
 tools = { path = "crates/tools" }
 torn_logic = { path = "crates/torn_logic" }
 model = { path = "crates/model" }
+godot_toast = { path = "../godot/addons/toast/rust" }
 
 # 默认使用最新版本，Android 打包时脚本会自动切换到 0.4.2
-godot = "0.4.5"
+godot = { git = "https://github.com/godot-rust/gdext.git", rev = "003b41c15a015b6ec886dfb72dece62301598d2c" }
 
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

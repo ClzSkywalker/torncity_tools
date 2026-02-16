@@ -1,0 +1,4 @@
+[gd_scene format=3 uid="uid://birayur2o0of4"]
+
+[node name="ToastManager" type="ToastManager" unique_id=1415870597]
+process_mode = 3

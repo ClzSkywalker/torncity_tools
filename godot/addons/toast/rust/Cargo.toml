@@ -1,0 +1,13 @@
+[package]
+name = "godot_toast"
+version = "0.1.0"
+edition = "2021"
+authors = ["Toast Team"]
+description = "A flexible toast notification library for Godot 4.x with Rust"
+license = "MIT OR Apache-2.0"
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+godot = { git = "https://github.com/godot-rust/gdext.git", rev = "003b41c15a015b6ec886dfb72dece62301598d2c" }

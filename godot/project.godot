@@ -37,7 +37,7 @@ project/assembly_name="TornTrade"
 
 [editor_plugins]
 
-enabled=PackedStringArray()
+enabled=PackedStringArray("res://addons/rust_tools/plugin.cfg")
 
 [input]
 

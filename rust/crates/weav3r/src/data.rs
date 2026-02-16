@@ -21,21 +21,21 @@ impl Weav3rSettingData {
     const DEFAULT_AUDIO_SWITCH: bool = true;
 
     const KEY_LIGHT_SEC: &str = "light_sec";
-    const DEFAULT_LIGHT_SEC: u64 = 30;
+    const DEFAULT_LIGHT_SEC: u16 = 30;
 
     /// 最近加载时间多少秒内的数据，用于判断是否需要高亮提示
     const KEY_RECENT_LOAD_LIGHT_SEC: &str = "recent_load_light_sec";
-    const DEFAULT_RECENT_LOAD_LIGHT_SEC: u64 = 60;
+    const DEFAULT_RECENT_LOAD_LIGHT_SEC: u16 = 60;
 
     const KEY_FILTER_IDS: &str = "filter_ids";
     const DEFAULT_FILTER_IDS: &str = "385,260,903,263,617,272,264,271,267,277,282,276,186,187,215,261,618,273,258,266,268,269,281,274,384,533,555,532,554,530,553,987,986,985,206,586,587,151,556,529,528,36,527,310,35,210,39,37,209,38,541,552,542,638,551,531,550,818,283,370,364,1080,1079,1082,1083,1078,1081,367,366,369";
 
     /// 官方回收最低价
     const KEY_OFFICE_SELL_PRICE: &str = "office_sell_price";
-    const DEFAULT_OFFICE_SELL_PRICE: u64 = 5000;
+    const DEFAULT_OFFICE_SELL_PRICE: i64 = 5000;
     /// 回收利润阀值
     const KEY_OFFICE_SELL_PROFIT: &str = "office_sell_profit";
-    const DEFAULT_OFFICE_SELL_PROFIT: u64 = 5000;
+    const DEFAULT_OFFICE_SELL_PROFIT: i64 = 5000;
 
         pub const KEY_NEXT_ACTION: &str = "next_action";
     const DEFAULT_NEXT_ACTION: &str = "";
@@ -120,16 +120,16 @@ impl Weav3rSettingData {
         );
     }
 
-    pub fn get_light_sec(&self) -> u64 {
-        self.cfg.read_config_u64(
+    pub fn get_light_sec(&self) -> u16 {
+        self.cfg.read_config_u16(
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_LIGHT_SEC,
             Weav3rSettingData::DEFAULT_LIGHT_SEC,
         )
     }
     
-    pub fn set_light_sec(&mut self, light_sec: u64) {
-        self.cfg.write_config_u64(
+    pub fn set_light_sec(&mut self, light_sec: u16) {
+        self.cfg.write_config_u16(
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_LIGHT_SEC,
             light_sec,
@@ -166,47 +166,47 @@ impl Weav3rSettingData {
         );
     }
 
-    pub fn get_office_sell_price(&self) -> u64 {
-        self.cfg.read_config_u64(
+    pub fn get_office_sell_price(&self) -> i64 {
+        self.cfg.read_config_i64(
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_OFFICE_SELL_PRICE,
             Weav3rSettingData::DEFAULT_OFFICE_SELL_PRICE,
         )
     }
-    pub fn set_office_sell_price(&mut self, office_sell_price: u64) {
-        self.cfg.write_config_u64(
+    pub fn set_office_sell_price(&mut self, office_sell_price: i64) {
+        self.cfg.write_config_i64(
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_OFFICE_SELL_PRICE,
             office_sell_price,
         );
     }
 
-    pub fn get_office_sell_profit(&self) -> u64 {
-        self.cfg.read_config_u64(
+    pub fn get_office_sell_profit(&self) -> i64 {
+        self.cfg.read_config_i64(
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_OFFICE_SELL_PROFIT,
             Weav3rSettingData::DEFAULT_OFFICE_SELL_PROFIT,
         )
     }
 
-    pub fn set_office_sell_profit(&mut self, value: u64) {
-        self.cfg.write_config_u64(
+    pub fn set_office_sell_profit(&mut self, value: i64) {
+        self.cfg.write_config_i64(
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_OFFICE_SELL_PROFIT,
             value,
         );
     }
 
-    pub fn get_recent_load_light_sec(&self) -> u64 {
-        self.cfg.read_config_u64(
+    pub fn get_recent_load_light_sec(&self) -> u16 {
+        self.cfg.read_config_u16(
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_RECENT_LOAD_LIGHT_SEC,
             Weav3rSettingData::DEFAULT_RECENT_LOAD_LIGHT_SEC,
         )
     }
 
-    pub fn set_recent_load_light_sec(&mut self, value: u64) {
-        self.cfg.write_config_u64(
+    pub fn set_recent_load_light_sec(&mut self, value: u16) {
+        self.cfg.write_config_u16(
             Weav3rSettingData::SECTION,
             Weav3rSettingData::KEY_RECENT_LOAD_LIGHT_SEC,
             value,
