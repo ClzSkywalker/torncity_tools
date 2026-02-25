@@ -3,6 +3,7 @@ pub mod config;
 pub mod toast;
 pub mod manager;
 
+#[cfg(feature = "entry")]
 mod entry;
 
 pub use types::*;

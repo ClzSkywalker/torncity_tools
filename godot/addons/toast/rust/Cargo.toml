@@ -9,5 +9,10 @@ license = "MIT OR Apache-2.0"
 [lib]
 crate-type = ["rlib"]
 
+[features]
+default = []
+# 作为独立 GDExtension 时启用；被主工程依赖时不要启用，避免与主工程 gdext_rust_init 重复
+entry = []
+
 [dependencies]
 godot = { git = "https://github.com/godot-rust/gdext.git", rev = "003b41c15a015b6ec886dfb72dece62301598d2c" }
